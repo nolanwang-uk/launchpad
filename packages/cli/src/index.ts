@@ -4,6 +4,8 @@ import { installCommand } from "./commands/install";
 import { uninstallCommand } from "./commands/uninstall";
 import { listCommand } from "./commands/list";
 import { doctorCommand } from "./commands/doctor";
+import { initCommand, listCommonLicenses } from "./commands/init";
+import { validateCommand } from "./commands/validate";
 import { EXIT } from "./errors";
 
 const VERSION = "0.1.0-dev.0";
@@ -17,6 +19,9 @@ type Flags = {
   json: boolean;
   quiet: boolean;
   target?: string;
+  license?: string;
+  author?: string;
+  tier?: "Reviewed" | "Community";
 };
 
 function parseFlags(argv: string[]): { verb: string | null; rest: string[]; flags: Flags } {
@@ -59,6 +64,17 @@ function parseFlags(argv: string[]): { verb: string | null; rest: string[]; flag
       flags.target = argv[++i];
     } else if (a.startsWith("--target=")) {
       flags.target = a.slice("--target=".length);
+    } else if (a === "--license") {
+      flags.license = argv[++i];
+    } else if (a.startsWith("--license=")) {
+      flags.license = a.slice("--license=".length);
+    } else if (a === "--author") {
+      flags.author = argv[++i];
+    } else if (a.startsWith("--author=")) {
+      flags.author = a.slice("--author=".length);
+    } else if (a === "--tier") {
+      const t = argv[++i];
+      if (t === "Reviewed" || t === "Community") flags.tier = t;
     } else if (!verb) {
       verb = a;
     } else {
@@ -78,7 +94,9 @@ function printHelp(): void {
       `  install <name|url>    fetch & copy into ~/.claude/skills/<name>/\n` +
       `  uninstall <name>      remove an installed skill\n` +
       `  list                  show installed skills (add --json for machine output)\n` +
-      `  doctor                environment preflight\n\n` +
+      `  doctor                environment preflight\n` +
+      `  init <name>           scaffold a new skill repo locally\n` +
+      `  validate [<path>]     run registry-PR-validator checks on a skill\n\n` +
       `flags:\n` +
       `  --help, -h          this help\n` +
       `  --version, -V       version + install source\n` +
@@ -165,9 +183,42 @@ async function main(): Promise<void> {
     process.exit(result.code);
   }
 
+  if (verb === "init") {
+    const name = rest[0];
+    const license = flags.license ?? "MIT";
+    const author = flags.author ?? process.env.USER ?? "anonymous";
+    if (!listCommonLicenses().includes(license)) {
+      process.stderr.write(
+        `error: --license '${license}' is not in the starter list\n` +
+          `why:   skillz init seeds a LICENSE file from a small vetted set.\n` +
+          `fix:   use one of: ${listCommonLicenses().join(", ")}.\n` +
+          `more:  https://launchpad.dev/docs/errors/init-bad-license\n`,
+      );
+      process.exit(EXIT.INPUT);
+    }
+    const result = await initCommand({
+      name,
+      cwd: process.cwd(),
+      openInEditor: !flags.quiet,
+      license,
+      author,
+    });
+    process.exit(result.code);
+  }
+
+  if (verb === "validate") {
+    const skillPath = rest[0] ?? ".";
+    const result = await validateCommand({
+      skillPath,
+      targetTier: flags.tier,
+      json: flags.json,
+    });
+    process.exit(result.code);
+  }
+
   process.stderr.write(
     `error: unknown verb '${verb}'\n` +
-      `why:   skillz v${VERSION} supports: run, install, uninstall, list, doctor.\n` +
+      `why:   skillz v${VERSION} supports: run, install, uninstall, list, doctor, init, validate.\n` +
       `fix:   run \`skillz --help\` for the full verb list.\n` +
       `more:  https://launchpad.dev/docs/errors/unknown-verb\n`,
   );

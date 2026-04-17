@@ -62,7 +62,7 @@ export async function execCommands(
         if (signal) resolve(128 + 15); // SIGTERM-ish
         else resolve(exitCode ?? 1);
       });
-      child.on("error", (e) => reject(e));
+      child.on("error", (e: Error) => reject(e));
     });
 
     if (code !== 0) {
