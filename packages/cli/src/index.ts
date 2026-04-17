@@ -1,5 +1,9 @@
 #!/usr/bin/env bun
 import { runCommand } from "./commands/run";
+import { installCommand } from "./commands/install";
+import { uninstallCommand } from "./commands/uninstall";
+import { listCommand } from "./commands/list";
+import { doctorCommand } from "./commands/doctor";
 import { EXIT } from "./errors";
 
 const VERSION = "0.1.0-dev.0";
@@ -70,9 +74,11 @@ function printHelp(): void {
     `skillz ${VERSION} — Launchpad CLI\n\n` +
       `usage: skillz [flags] <verb> [args]\n\n` +
       `verbs (v1):\n` +
-      `  run <name|url>      fetch & execute one-shot in temp dir (primary)\n` +
-      `  install <name|url>  fetch & copy into ~/.claude/skills/<name>/   [planned]\n` +
-      `  doctor              environment preflight                        [planned]\n\n` +
+      `  run <name|url>        fetch & execute one-shot in temp dir (primary)\n` +
+      `  install <name|url>    fetch & copy into ~/.claude/skills/<name>/\n` +
+      `  uninstall <name>      remove an installed skill\n` +
+      `  list                  show installed skills (add --json for machine output)\n` +
+      `  doctor                environment preflight\n\n` +
       `flags:\n` +
       `  --help, -h          this help\n` +
       `  --version, -V       version + install source\n` +
@@ -116,9 +122,52 @@ async function main(): Promise<void> {
     process.exit(result.code);
   }
 
+  if (verb === "install") {
+    const arg = rest[0];
+    if (!arg && !flags.fromLocal) {
+      process.stderr.write(
+        "error: `install` requires a name or URL\n" +
+          "why:   no argument was provided and --from-local was not set.\n" +
+          "fix:   try `skillz install github.com/you/my-skill` or `skillz install --from-local ./my-skill`.\n" +
+          "more:  https://launchpad.dev/docs/errors/install-needs-arg\n",
+      );
+      process.exit(EXIT.INPUT);
+    }
+    const result = await installCommand(arg ?? "", {
+      targetRoot: flags.target,
+      assumeYes: flags.assumeYes,
+      acceptRisk: flags.acceptRisk,
+      dryRun: flags.dryRun,
+      fromLocal: flags.fromLocal,
+    });
+    process.exit(result.code);
+  }
+
+  if (verb === "uninstall") {
+    const arg = rest[0];
+    const result = await uninstallCommand(arg ?? "", {
+      targetRoot: flags.target,
+      assumeYes: flags.assumeYes,
+    });
+    process.exit(result.code);
+  }
+
+  if (verb === "list") {
+    const result = await listCommand({
+      targetRoot: flags.target,
+      json: flags.json,
+    });
+    process.exit(result.code);
+  }
+
+  if (verb === "doctor") {
+    const result = await doctorCommand();
+    process.exit(result.code);
+  }
+
   process.stderr.write(
     `error: unknown verb '${verb}'\n` +
-      `why:   skillz v${VERSION} supports: run (v1), install/doctor (planned).\n` +
+      `why:   skillz v${VERSION} supports: run, install, uninstall, list, doctor.\n` +
       `fix:   run \`skillz --help\` for the full verb list.\n` +
       `more:  https://launchpad.dev/docs/errors/unknown-verb\n`,
   );

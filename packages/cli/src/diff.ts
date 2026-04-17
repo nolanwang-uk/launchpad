@@ -1,5 +1,6 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
+import { flagPatterns } from "@launchpad/registry";
 import type { Manifest } from "./manifest";
 
 export type Tier = "Reviewed" | "Community";
@@ -10,24 +11,12 @@ export type DiffOutput = {
   flaggedPatterns: string[];
 };
 
-const BASE64_PIPE_RE = /\b(?:base64|openssl\s+base64)\b[^\n]*\|\s*(?:sh|bash|zsh)\b/;
-const CURL_PIPE_RE = /\b(?:curl|wget|fetch)\b[^\n|]*\|\s*(?:sh|bash|zsh)\b/;
-const SUBSHELL_EXEC_RE = /\bsh\s+-c\s*"?\$\(/;
-const DANGEROUS_VERBS_RE = /\b(?:eval|osascript|sudo|source)\b/;
+function detectFlags(commands: readonly string[]): string[] {
+  return Array.from(new Set(flagPatterns(commands).map((f) => f.kind)));
+}
+
 // Base64-ish payload literal: 40+ chars of [A-Za-z0-9+/] with optional = padding.
 const BASE64_LITERAL_RE = /\b[A-Za-z0-9+/]{40,}={0,2}\b/;
-
-function detectFlags(commands: readonly string[]): string[] {
-  const flags: string[] = [];
-  for (const cmd of commands) {
-    if (BASE64_PIPE_RE.test(cmd)) flags.push("base64 pipe to shell");
-    if (CURL_PIPE_RE.test(cmd)) flags.push("remote-fetch piped to shell");
-    if (SUBSHELL_EXEC_RE.test(cmd)) flags.push("command substitution into shell -c");
-    if (DANGEROUS_VERBS_RE.test(cmd)) flags.push("dangerous verb (eval/sudo/osascript/source)");
-    if (BASE64_LITERAL_RE.test(cmd)) flags.push("suspicious base64-ish literal");
-  }
-  return Array.from(new Set(flags));
-}
 
 /**
  * Decoded-form annotation. If a command contains a base64 literal, try to

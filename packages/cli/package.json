@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@launchpad/registry": "workspace:*",
     "yaml": "^2.6.1"
   },
   "devDependencies": {

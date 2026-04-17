@@ -11,6 +11,11 @@ export type RepoRef = {
   sha: string;
 };
 
+export function makeRepoRef(owner: string, name: string, sha: string): RepoRef {
+  assertValidSha40(sha, `${owner}/${name}`);
+  return { owner, name, sha };
+}
+
 const GITHUB_URL = /^https?:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/?$/;
 const SHORT_REF = /^([^/]+)\/([^/@]+)(?:@([0-9a-f]{40}))?$/;
 

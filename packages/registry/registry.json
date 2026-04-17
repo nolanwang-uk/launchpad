@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-04-17T00:00:00Z",
+  "entries": [
+    {
+      "schema_version": 1,
+      "name": "hello-world",
+      "description": "A tiny test skill. Writes a greeting into ~/.claude/skills/.",
+      "author": "launchpad-seed",
+      "license": "MIT",
+      "repo": "launchpad-skills/hello-world",
+      "sha": "0000000000000000000000000000000000000000",
+      "tier": "Reviewed",
+      "targets": ["claude-code"],
+      "capabilities": {
+        "network": false,
+        "filesystem": true,
+        "shell": false
+      },
+      "tags": ["example", "seed"],
+      "added_at": "2026-04-17T00:00:00Z"
+    }
+  ]
+}

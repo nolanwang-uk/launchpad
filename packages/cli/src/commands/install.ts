@@ -12,56 +12,53 @@ import { renderDiff, type Tier } from "../diff";
 import { askConsent } from "../prompt";
 import { execCommands } from "../exec";
 import { err, EXIT, isSkillzError, printErr } from "../errors";
+import { makeLock, skillDir, writeLock } from "../install-lock";
 import { resolveShortName, looksLikeShortName } from "../registry";
 
-export type RunOpts = {
-  target: string; // "run" uses a temp dir; "install" uses this path
+export type InstallOpts = {
+  targetRoot?: string; // override ~/.claude/skills
   assumeYes: boolean;
   acceptRisk: boolean;
   dryRun: boolean;
   fromLocal?: string;
-  // Override the resolved tier. For --from-local or raw URLs we default to
-  // Community; registry short-names bring their tier from the entry.
   tierOverride?: Tier;
-  // Override the registry source (path or URL). Useful for tests + power users.
   registry?: string;
 };
 
-export type RunResult = {
+export type InstallResult = {
   code: number;
+  installedTo?: string;
   abortedByUser?: boolean;
 };
 
 /**
- * `skillz run <name|url>` — fetches, shows diff, prompts, executes one-shot
- * in a temp dir. The resolved extractDir is cleaned up on every exit path.
+ * `skillz install <name|url>` — same consent flow as `run`, but instead of
+ * executing one-shot in a temp dir, we:
+ *   1. Compute target = <skillsRoot>/<manifest.name>/
+ *   2. Copy `files[]` from the archive into the target
+ *   3. Run install_commands with cwd=target (so relative paths in commands
+ *      like `chmod +x bin/setup.sh` work after copy)
+ *   4. Write a .skillz-lock.json to the target (for `list` and `update`)
  */
-export async function runCommand(
+export async function installCommand(
   arg: string,
-  opts: RunOpts,
-): Promise<RunResult> {
+  opts: InstallOpts,
+): Promise<InstallResult> {
   let extractDir: string | undefined;
-  let tmpRootForLocalCopy: string | undefined;
+  let sourceUrl: string | null = null;
+  let sha = "";
 
   const cleanup = async () => {
     if (extractDir && !opts.fromLocal) {
       await cleanupExtracted(extractDir);
     }
-    if (tmpRootForLocalCopy) {
-      await fs
-        .rm(tmpRootForLocalCopy, { recursive: true, force: true })
-        .catch(() => {});
-    }
   };
 
-  // Wire SIGINT to clean up and exit.
   const onSig = () => {
     cleanup().finally(() => process.exit(EXIT.SIGNAL));
   };
   process.once("SIGINT", onSig);
   process.once("SIGTERM", onSig);
-
-  let resolvedTier: Tier | undefined = opts.tierOverride;
 
   try {
     if (opts.fromLocal) {
@@ -72,19 +69,23 @@ export async function runCommand(
           "local-not-dir",
           "--from-local path is not a directory",
           `expected a directory containing skill.yml, got: '${extractDir}'.`,
-          "pass a path to a directory, e.g. `skillz run --from-local ./my-skill`.",
+          "pass a path to a directory, e.g. `skillz install --from-local ./my-skill`.",
           EXIT.INPUT,
         );
       }
+      sourceUrl = "local";
+      sha = "local";
     } else {
       let ref: RepoRef;
       if (looksLikeShortName(arg)) {
         const resolved = await resolveShortName(arg, opts.registry);
         ref = makeRepoRef(resolved.owner, resolved.repoName, resolved.sha);
-        resolvedTier ??= resolved.tier;
+        opts.tierOverride ??= resolved.tier;
       } else {
         ref = parseRepoArg(arg);
       }
+      sourceUrl = `github.com/${ref.owner}/${ref.name}@${ref.sha}`;
+      sha = ref.sha;
       extractDir = await fetchAndExtract(ref);
     }
 
@@ -100,13 +101,16 @@ export async function runCommand(
     });
 
     const manifest = parseManifest(yamlText, manifestPath);
-    const tier: Tier = resolvedTier ?? "Community";
+    const tier: Tier = opts.tierOverride ?? "Community";
 
     const diff = await renderDiff(manifest, tier, extractDir);
     process.stdout.write(diff.text);
+    process.stdout.write(
+      `\ntarget: ${skillDir(manifest.name, opts.targetRoot)}\n`,
+    );
 
     if (opts.dryRun) {
-      process.stdout.write("\n(dry-run: skipping prompt and exec)\n");
+      process.stdout.write("\n(dry-run: skipping prompt, copy, and exec)\n");
       return { code: EXIT.OK };
     }
 
@@ -120,12 +124,28 @@ export async function runCommand(
       return { code: EXIT.OK, abortedByUser: true };
     }
 
+    const target = skillDir(manifest.name, opts.targetRoot);
+    await fs.mkdir(target, { recursive: true });
+
+    // Copy files[] from the archive into the target dir.
+    for (const f of manifest.files) {
+      const src = path.join(extractDir, f);
+      const dst = path.join(target, f);
+      await fs.mkdir(path.dirname(dst), { recursive: true });
+      await fs.copyFile(src, dst);
+    }
+
+    // Run install_commands with cwd=target. This matches the typical shape
+    // where install_commands operate on the freshly-copied tree.
     await execCommands(manifest.install_commands, {
-      cwd: extractDir,
+      cwd: target,
       dryRun: false,
     });
 
-    return { code: EXIT.OK };
+    await writeLock(target, makeLock({ manifest, sha, sourceUrl }));
+
+    process.stdout.write(`\n✓ installed to ${target}\n`);
+    return { code: EXIT.OK, installedTo: target };
   } catch (e) {
     if (isSkillzError(e)) {
       printErr(e);
