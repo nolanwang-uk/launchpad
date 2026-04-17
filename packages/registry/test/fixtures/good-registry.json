@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-04-17T00:00:00Z",
+  "entries": [
+    {
+      "schema_version": 1,
+      "name": "first-skill",
+      "description": "A minimal valid skill.",
+      "author": "nolan",
+      "license": "MIT",
+      "repo": "foo/first-skill",
+      "sha": "0123456789abcdef0123456789abcdef01234567",
+      "tier": "Reviewed",
+      "targets": ["claude-code"],
+      "capabilities": { "network": false, "filesystem": true, "shell": false },
+      "tags": ["example"],
+      "added_at": "2026-04-17T00:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test + typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck (CLI)
+        run: bunx tsc --noEmit
+        working-directory: packages/cli
+
+      - name: Typecheck (registry)
+        run: bunx tsc --noEmit
+        working-directory: packages/registry
+
+      - name: Typecheck (gallery)
+        run: bunx tsc --noEmit
+        working-directory: packages/gallery
+
+      - name: Unit + integration tests
+        run: bun test
+
+      - name: Build gallery
+        run: bun run build
+        working-directory: packages/gallery
+
+  smoke:
+    name: CLI smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: skillz --version
+        run: bun packages/cli/src/index.ts --version
+
+      - name: skillz --help
+        run: bun packages/cli/src/index.ts --help
+
+      - name: skillz doctor
+        run: bun packages/cli/src/index.ts doctor
+
+      - name: skillz run --from-local <fixture> --dry-run
+        run: |
+          bun packages/cli/src/index.ts run \
+            --from-local packages/cli/test/fixtures/test-skill \
+            --dry-run
+
+      - name: skillz init + validate round-trip
+        run: |
+          cd "$(mktemp -d)"
+          bun "$GITHUB_WORKSPACE/packages/cli/src/index.ts" init my-smoke --author ci --license MIT --quiet
+          bun "$GITHUB_WORKSPACE/packages/cli/src/index.ts" validate ./my-smoke --tier Reviewed

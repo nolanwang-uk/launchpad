@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-04-17T00:00:00Z",
+  "entries": [
+    {
+      "schema_version": 1,
+      "name": "Bad Name",
+      "description": "Uppercase + spaces in the name.",
+      "author": "test",
+      "license": "MIT",
+      "repo": "foo/bad",
+      "sha": "main",
+      "tier": "Gold",
+      "targets": ["cursor"],
+      "capabilities": { "network": false, "filesystem": true, "shell": "yes" },
+      "tags": ["Not Valid Tag"],
+      "added_at": "not-a-date"
+    },
+    {
+      "schema_version": 1,
+      "name": "Bad Name",
+      "description": "Duplicate name triggers the cross-entry check.",
+      "author": "test",
+      "license": "MIT",
+      "repo": "foo/other",
+      "sha": "0123456789abcdef0123456789abcdef01234567",
+      "tier": "Community",
+      "targets": ["claude-code"],
+      "capabilities": { "network": false, "filesystem": true, "shell": false },
+      "tags": [],
+      "added_at": "2026-04-17T00:00:00Z"
+    }
+  ]
+}
