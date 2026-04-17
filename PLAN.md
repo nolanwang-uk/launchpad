@@ -29,6 +29,42 @@ Ship v1 in ~10 days. Definition of Done below. Scope locked after /autoplan revi
   - Cross-agent adapters (if `targets:` array gets 2nd value in the wild)
   - Native Windows binary
   - Skill authoring UI on the gallery
+  - **Private skills + paid marketplace** (see sketch below)
+
+### V2 sketch: Private skills + paid marketplace
+
+**Problem it solves:** The producer flywheel. Today the only incentive to publish is status. Paid skills give creators a revenue reason to author and maintain, and differentiate Launchpad from Anthropic's eventual free first-party browser (they sell tokens, not content).
+
+**What we already have that carries over:**
+- SHA-pinned, deterministic install unit (a skill pinned at a specific SHA is a sellable artifact).
+- Capability manifest (`network/filesystem/shell`) describes exactly what the buyer is authorizing.
+- Closed-grammar install_commands (Reviewed tier) means buyers can audit before paying.
+- `skillz verify` (Phase 5) already sets the pattern for runtime-verified trust.
+
+**What's new (not free):**
+1. **Visibility flag on registry entries:** `visibility: "public" | "private"`. Private entries are absent from the public gallery and require a signed token to install.
+2. **License server:** a Vercel endpoint that mints HMAC-signed, time-limited install tokens for a `(skill-sha, buyer-identity)` pair. CLI passes the token to the registry resolver; without a valid token, private entries return a `402` / `skillz` prints the purchase URL.
+3. **Payment integration:** Stripe Checkout (likely Connect for creator payouts). One-time purchase first; subscriptions later. Prices in creator-set USD with regional price parity later.
+4. **Creator dashboard:** auth (probably GitHub OAuth for reach + dev identity), skill listing + price management, payout status, sales history.
+5. **Buyer dashboard:** list of purchased skills, re-download, license portability across devices.
+6. **`skillz login` / identity:** CLI needs a stable buyer identity (not a device ID) so a purchase survives reinstalls and works across their laptops.
+7. **Legal + tax:** Terms of Service (creator + buyer), DMCA process, refund policy, VAT/MOSS for EU sales, US state sales tax where thresholds apply, 1099-K for US creators over $600/yr.
+
+**What it'd cost:** Best case, 4–6 weeks for a single builder. Not a weekend, not a 2-week feature. Payments + tax + legal eat real founder time even with Stripe.
+
+**Trigger to revisit (success criteria for V2 kickoff):**
+- V1 has ≥1,000 weekly installs across free skills (validates demand density).
+- At least 3 unsolicited creator inquiries asking "can I charge for mine?"
+- Anthropic has NOT shipped a paid first-party skill browser (unlikely but worth monitoring).
+
+**Alternative — lighter weight, could go in v1.1 if demand appears:**
+- "Pay what you want" tip button on the gallery skill page (Stripe Payment Link, no account infra). Solves the "reward creators" problem without building a full market. One-evening build. The market question ("can you make a living selling skills?") stays open, but creators who want money can receive it.
+
+**Explicitly out of v2 scope (to prevent feature-creep):**
+- Marketplace curation (Apple-style editorial). Keep it creator-publishes-directly.
+- Enterprise / team / org licenses. Single-user purchases only.
+- Creator royalty splits (collaborations). One-creator-per-skill.
+- Skill versioning discounts or upgrade pricing. Each SHA is its own sale.
 
 
 ## Architecture
