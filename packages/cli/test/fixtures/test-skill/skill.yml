@@ -1,0 +1,17 @@
+schema_version: 1
+name: hello-world
+version: 0.1.0
+description: A minimal test skill that writes a greeting to a scratch dir.
+author: launchpad-tests
+license: MIT
+targets:
+  - claude-code
+capabilities:
+  network: false
+  filesystem: true
+  shell: false
+files:
+  - SKILL.md
+install_commands:
+  - mkdir -p $SKILLZ_TEST_OUT
+  - cp SKILL.md $SKILLZ_TEST_OUT/hello.md
