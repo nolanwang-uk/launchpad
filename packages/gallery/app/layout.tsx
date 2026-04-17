@@ -1,0 +1,45 @@
+import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
+import "./globals.css";
+
+const interDisplay = Inter({
+  subsets: ["latin"],
+  variable: "--next-inter-display",
+  display: "swap",
+  axes: ["opsz"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--next-jetbrains-mono",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "Launchpad — one command, any Claude Code skill",
+  description:
+    "A curated marketplace for Claude Code skills. Discover, install, and run skills with one copy-paste command. Source always visible, SHA-pinned, security-first.",
+  metadataBase: new URL("https://launchpad.dev"),
+  openGraph: {
+    title: "Launchpad",
+    description: "One command, any Claude Code skill.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Launchpad",
+    description: "One command, any Claude Code skill.",
+  },
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en" className={`${interDisplay.variable} ${jetbrainsMono.variable}`}>
+      <body>{children}</body>
+    </html>
+  );
+}

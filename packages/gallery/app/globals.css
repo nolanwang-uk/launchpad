@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  /* Monochrome + one accent. Developer-tool aesthetic. */
+  --color-bg: #0a0a0b;
+  --color-bg-elevated: #131316;
+  --color-bg-hover: #1a1a1e;
+  --color-border: #27272a;
+  --color-border-strong: #3f3f46;
+
+  --color-fg: #f4f4f5;
+  --color-fg-muted: #a1a1aa;
+  --color-fg-subtle: #71717a;
+
+  --color-accent: #fafafa;
+  --color-accent-muted: #e4e4e7;
+
+  /* Reviewed tier = slate-500 (neutral), Community = outlined. Per D6. */
+  --color-tier-reviewed: #64748b;
+  --color-tier-reviewed-fg: #f8fafc;
+
+  /* Typography — F6 locked: Inter Display + JetBrains Mono (free). */
+  --font-display: var(--next-inter-display), system-ui, sans-serif;
+  --font-mono: var(--next-jetbrains-mono), ui-monospace, monospace;
+
+  --tracking-display-tight: -0.03em;
+  --tracking-mono: -0.01em;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  /* Reduce motion by default when the user asks. Respected everywhere. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Focus rings — 2px offset in accent per D7. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
