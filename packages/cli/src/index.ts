@@ -6,6 +6,10 @@ import { listCommand } from "./commands/list";
 import { doctorCommand } from "./commands/doctor";
 import { initCommand, listCommonLicenses } from "./commands/init";
 import { validateCommand } from "./commands/validate";
+import { infoCommand } from "./commands/info";
+import { searchCommand } from "./commands/search";
+import { updateCommand } from "./commands/update";
+import { cacheCommand } from "./commands/cache";
 import { EXIT } from "./errors";
 
 const VERSION = "0.1.0-dev.0";
@@ -22,6 +26,7 @@ type Flags = {
   license?: string;
   author?: string;
   tier?: "Reviewed" | "Community";
+  limit?: number;
 };
 
 function parseFlags(argv: string[]): { verb: string | null; rest: string[]; flags: Flags } {
@@ -75,6 +80,12 @@ function parseFlags(argv: string[]): { verb: string | null; rest: string[]; flag
     } else if (a === "--tier") {
       const t = argv[++i];
       if (t === "Reviewed" || t === "Community") flags.tier = t;
+    } else if (a === "--limit") {
+      const n = Number(argv[++i]);
+      if (Number.isFinite(n) && n > 0) flags.limit = Math.floor(n);
+    } else if (a.startsWith("--limit=")) {
+      const n = Number(a.slice("--limit=".length));
+      if (Number.isFinite(n) && n > 0) flags.limit = Math.floor(n);
     } else if (!verb) {
       verb = a;
     } else {
@@ -94,6 +105,10 @@ function printHelp(): void {
       `  install <name|url>    fetch & copy into ~/.claude/skills/<name>/\n` +
       `  uninstall <name>      remove an installed skill\n` +
       `  list                  show installed skills (add --json for machine output)\n` +
+      `  info <name>           show registry metadata for a skill\n` +
+      `  search <term>         fuzzy-match registry entries by name / tag / desc\n` +
+      `  update [<name>]       refresh installed skills to latest registry SHA\n` +
+      `  cache clear           drop the local registry cache\n` +
       `  doctor                environment preflight\n` +
       `  init <name>           scaffold a new skill repo locally\n` +
       `  validate [<path>]     run registry-PR-validator checks on a skill\n\n` +
@@ -213,6 +228,52 @@ async function main(): Promise<void> {
       targetTier: flags.tier,
       json: flags.json,
     });
+    process.exit(result.code);
+  }
+
+  if (verb === "info") {
+    const name = rest[0];
+    const result = await infoCommand({
+      name: name ?? "",
+      json: flags.json,
+    });
+    process.exit(result.code);
+  }
+
+  if (verb === "search") {
+    const term = rest.join(" ");
+    const result = await searchCommand({
+      term,
+      json: flags.json,
+      limit: flags.limit ?? 20,
+    });
+    process.exit(result.code);
+  }
+
+  if (verb === "update") {
+    const name = rest[0];
+    const result = await updateCommand({
+      name,
+      targetRoot: flags.target,
+      assumeYes: flags.assumeYes,
+      acceptRisk: flags.acceptRisk,
+      dryRun: flags.dryRun,
+    });
+    process.exit(result.code);
+  }
+
+  if (verb === "cache") {
+    const sub = rest[0];
+    if (sub !== "clear" && sub !== "show") {
+      process.stderr.write(
+        `error: \`cache\` requires a subverb\n` +
+          `why:   only 'clear' and 'show' are supported.\n` +
+          `fix:   try \`skillz cache clear\` or \`skillz cache show\`.\n` +
+          `more:  https://launchpad.dev/docs/errors/cache-subverb\n`,
+      );
+      process.exit(EXIT.INPUT);
+    }
+    const result = await cacheCommand({ subverb: sub });
     process.exit(result.code);
   }
 

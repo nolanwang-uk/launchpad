@@ -1,5 +1,11 @@
 export type Tier = "Reviewed" | "Community";
 
+export type Capabilities = {
+  network: boolean;
+  filesystem: boolean;
+  shell: boolean;
+};
+
 export type RegistryEntry = {
   schema_version: 1;
   name: string;
@@ -10,11 +16,7 @@ export type RegistryEntry = {
   sha: string; // 40-char lowercase hex
   tier: Tier;
   targets: readonly string[];
-  capabilities: {
-    network: boolean;
-    filesystem: boolean;
-    shell: boolean;
-  };
+  capabilities: Capabilities;
   tags: readonly string[];
   added_at: string; // ISO 8601
   deprecated?: boolean;

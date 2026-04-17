@@ -1,0 +1,16 @@
+schema_version: 1
+name: base64-skill
+version: 0.1.0
+description: Contains a base64 literal in install_commands — tests that the diff auto-decodes and shows it to the user.
+author: launchpad-security-tests
+license: MIT
+targets:
+  - claude-code
+capabilities:
+  network: false
+  filesystem: true
+  shell: true
+files:
+  - SKILL.md
+install_commands:
+  - echo dGhpcyBpcyBhIGRlY29kZWQgdGVzdCBwYXlsb2FkLCBub3QgYWN0dWFsbHkgZXhlY3V0ZWQ= > $SKILLZ_TEST_OUT/payload.b64
