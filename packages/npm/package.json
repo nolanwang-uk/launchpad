@@ -1,0 +1,46 @@
+{
+  "name": "launchpad",
+  "version": "0.1.0-dev.0",
+  "description": "npx launchpad run <skill> — a curated marketplace for Claude Code skills. One command install, SHA-pinned, diff-before-exec, scrubbed environment.",
+  "keywords": [
+    "claude-code",
+    "claude",
+    "agent",
+    "skill",
+    "marketplace",
+    "registry",
+    "cli"
+  ],
+  "license": "MIT",
+  "bin": {
+    "launchpad": "./bin/skillz.js",
+    "skillz": "./bin/skillz.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "vendor/",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "cpu": [
+    "arm64",
+    "x64"
+  ],
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "vendor:local": "mkdir -p vendor/darwin-arm64 && cp ../cli/dist/skillz vendor/darwin-arm64/skillz && chmod +x vendor/darwin-arm64/skillz"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.14",
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
+  }
+}

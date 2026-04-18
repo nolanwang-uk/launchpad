@@ -171,3 +171,130 @@ jobs:
             release/SHASUMS256.txt
             release/SHASUMS256.txt.sig
             release/SHASUMS256.txt.bundle
+
+      # Export SHAs so follow-on jobs can bump the Homebrew formula.
+      - name: Emit per-target SHA256 outputs
+        id: shas
+        working-directory: release
+        run: |
+          for t in darwin-arm64 darwin-x64 linux-arm64 linux-x64; do
+            sha=$(sha256sum "skillz-$t" | awk '{print $1}')
+            echo "${t}=${sha}" >> "$GITHUB_OUTPUT"
+          done
+          echo "version=${GITHUB_REF_NAME#skillz-v}" >> "$GITHUB_OUTPUT"
+    outputs:
+      darwin_arm64: ${{ steps.shas.outputs.darwin-arm64 }}
+      darwin_x64: ${{ steps.shas.outputs.darwin-x64 }}
+      linux_arm64: ${{ steps.shas.outputs.linux-arm64 }}
+      linux_x64: ${{ steps.shas.outputs.linux-x64 }}
+      version: ${{ steps.shas.outputs.version }}
+
+  publish-npm:
+    name: publish npm wrapper
+    runs-on: ubuntu-22.04
+    needs: [build, sign-and-release]
+    timeout-minutes: 10
+    # Gate on the secret — if NPM_TOKEN is absent, the step is skipped
+    # rather than failing.
+    if: ${{ !contains(github.ref_name, '-dev') }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Download per-target artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Vendor binaries into the npm package
+        run: |
+          cd packages/npm
+          for t in darwin-arm64 darwin-x64 linux-arm64 linux-x64; do
+            mkdir -p "vendor/$t"
+            cp "../../artifacts/skillz-$t/skillz-$t" "vendor/$t/skillz"
+            chmod +x "vendor/$t/skillz"
+          done
+          ls -la vendor/*/
+
+      - name: Stamp version into package.json
+        working-directory: packages/npm
+        run: |
+          version="${GITHUB_REF_NAME#skillz-v}"
+          npm version "$version" --no-git-tag-version --allow-same-version
+
+      - name: npm publish
+        working-directory: packages/npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "NPM_TOKEN secret not set — skipping publish."
+            exit 0
+          fi
+          npm publish --access public --provenance
+
+  bump-tap:
+    name: bump Homebrew tap
+    runs-on: ubuntu-22.04
+    needs: sign-and-release
+    timeout-minutes: 5
+    if: ${{ !contains(github.ref_name, '-dev') }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Render updated formula
+        env:
+          VERSION: ${{ needs.sign-and-release.outputs.version }}
+          SHA_DARWIN_ARM64: ${{ needs.sign-and-release.outputs.darwin_arm64 }}
+          SHA_DARWIN_X64: ${{ needs.sign-and-release.outputs.darwin_x64 }}
+          SHA_LINUX_ARM64: ${{ needs.sign-and-release.outputs.linux_arm64 }}
+          SHA_LINUX_X64: ${{ needs.sign-and-release.outputs.linux_x64 }}
+        run: |
+          sed -i \
+            -e "s/^  version \".*\"$/  version \"${VERSION}\"/" \
+            packages/homebrew/Formula/skillz.rb
+          # Replace the 4 placeholder sha256 lines in order. The formula
+          # file lists them in the fixed order: darwin-arm, darwin-intel,
+          # linux-arm, linux-intel. We use awk to rewrite by position.
+          awk -v a="${SHA_DARWIN_ARM64}" \
+              -v b="${SHA_DARWIN_X64}" \
+              -v c="${SHA_LINUX_ARM64}" \
+              -v d="${SHA_LINUX_X64}" '
+            /sha256 PLACEHOLDER/ {
+              n++
+              if (n == 1) { sub("PLACEHOLDER", "\""a"\""); }
+              else if (n == 2) { sub("PLACEHOLDER", "\""b"\""); }
+              else if (n == 3) { sub("PLACEHOLDER", "\""c"\""); }
+              else if (n == 4) { sub("PLACEHOLDER", "\""d"\""); }
+              print; next
+            }
+            { print }
+          ' packages/homebrew/Formula/skillz.rb > /tmp/skillz.rb.new
+          mv /tmp/skillz.rb.new packages/homebrew/Formula/skillz.rb
+          cat packages/homebrew/Formula/skillz.rb
+
+      - name: Push to tap repo
+        env:
+          TAP_TOKEN: ${{ secrets.TAP_DEPLOY_KEY }}
+        run: |
+          if [ -z "$TAP_TOKEN" ]; then
+            echo "TAP_DEPLOY_KEY not set — tap bump skipped (render only)."
+            exit 0
+          fi
+          git config --global user.name "launchpad-release-bot"
+          git config --global user.email "bot@launchpad.dev"
+          tapdir=$(mktemp -d)
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/launchpad-skills/homebrew-tap.git" "$tapdir"
+          cp packages/homebrew/Formula/skillz.rb "$tapdir/Formula/skillz.rb"
+          cd "$tapdir"
+          git add Formula/skillz.rb
+          git commit -m "skillz ${{ needs.sign-and-release.outputs.version }}"
+          git push origin main
