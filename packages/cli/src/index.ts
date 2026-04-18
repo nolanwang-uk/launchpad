@@ -10,6 +10,7 @@ import { infoCommand } from "./commands/info";
 import { searchCommand } from "./commands/search";
 import { updateCommand } from "./commands/update";
 import { cacheCommand } from "./commands/cache";
+import { verifyCommand } from "./commands/verify";
 import { EXIT } from "./errors";
 
 const VERSION = "0.1.0-dev.0";
@@ -27,6 +28,9 @@ type Flags = {
   author?: string;
   tier?: "Reviewed" | "Community";
   limit?: number;
+  binary?: string;
+  shasums?: string;
+  assetName?: string;
 };
 
 function parseFlags(argv: string[]): { verb: string | null; rest: string[]; flags: Flags } {
@@ -86,6 +90,18 @@ function parseFlags(argv: string[]): { verb: string | null; rest: string[]; flag
     } else if (a.startsWith("--limit=")) {
       const n = Number(a.slice("--limit=".length));
       if (Number.isFinite(n) && n > 0) flags.limit = Math.floor(n);
+    } else if (a === "--binary") {
+      flags.binary = argv[++i];
+    } else if (a.startsWith("--binary=")) {
+      flags.binary = a.slice("--binary=".length);
+    } else if (a === "--shasums") {
+      flags.shasums = argv[++i];
+    } else if (a.startsWith("--shasums=")) {
+      flags.shasums = a.slice("--shasums=".length);
+    } else if (a === "--asset-name") {
+      flags.assetName = argv[++i];
+    } else if (a.startsWith("--asset-name=")) {
+      flags.assetName = a.slice("--asset-name=".length);
     } else if (!verb) {
       verb = a;
     } else {
@@ -108,6 +124,7 @@ function printHelp(): void {
       `  info <name>           show registry metadata for a skill\n` +
       `  search <term>         fuzzy-match registry entries by name / tag / desc\n` +
       `  update [<name>]       refresh installed skills to latest registry SHA\n` +
+      `  verify                cosign + sha256 check on this skillz binary\n` +
       `  cache clear           drop the local registry cache\n` +
       `  doctor                environment preflight\n` +
       `  init <name>           scaffold a new skill repo locally\n` +
@@ -258,6 +275,16 @@ async function main(): Promise<void> {
       assumeYes: flags.assumeYes,
       acceptRisk: flags.acceptRisk,
       dryRun: flags.dryRun,
+    });
+    process.exit(result.code);
+  }
+
+  if (verb === "verify") {
+    const result = await verifyCommand({
+      binaryPath: flags.binary,
+      shasumsPath: flags.shasums,
+      assetName: flags.assetName,
+      json: flags.json,
     });
     process.exit(result.code);
   }

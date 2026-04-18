@@ -9,7 +9,13 @@
   "scripts": {
     "start": "bun src/index.ts",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "bun build src/index.ts --compile --minify --sourcemap --outfile dist/skillz",
+    "build:darwin-arm64": "bun build src/index.ts --compile --minify --target=bun-darwin-arm64 --outfile dist/skillz-darwin-arm64",
+    "build:darwin-x64": "bun build src/index.ts --compile --minify --target=bun-darwin-x64 --outfile dist/skillz-darwin-x64",
+    "build:linux-arm64": "bun build src/index.ts --compile --minify --target=bun-linux-arm64 --outfile dist/skillz-linux-arm64",
+    "build:linux-x64": "bun build src/index.ts --compile --minify --target=bun-linux-x64 --outfile dist/skillz-linux-x64",
+    "build:all": "bun run build:darwin-arm64 && bun run build:darwin-x64 && bun run build:linux-arm64 && bun run build:linux-x64"
   },
   "dependencies": {
     "@launchpad/registry": "workspace:*",
