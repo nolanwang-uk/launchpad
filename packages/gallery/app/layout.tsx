@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { CommandPalette, type PaletteEntry } from "@/components/CommandPalette";
+import { loadRegistrySync } from "@/lib/registry";
 
 const interDisplay = Inter({
   subsets: ["latin"],
@@ -37,9 +39,20 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const registry = loadRegistrySync();
+  const paletteEntries: PaletteEntry[] = registry.entries.map((e) => ({
+    name: e.name,
+    description: e.description,
+    tier: e.tier,
+    tags: e.tags,
+  }));
+
   return (
     <html lang="en" className={`${interDisplay.variable} ${jetbrainsMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <CommandPalette entries={paletteEntries} />
+      </body>
     </html>
   );
 }

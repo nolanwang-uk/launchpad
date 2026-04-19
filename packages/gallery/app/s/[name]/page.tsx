@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findEntry, loadRegistrySync } from "@/lib/registry";
+import { renderMarkdown } from "@/lib/markdown";
 import { CopyCommand } from "@/components/CopyCommand";
 import { TierBadge } from "@/components/TierBadge";
+import { Prose } from "@/components/Prose";
 
 export function generateStaticParams() {
   return loadRegistrySync().entries.map((e) => ({ name: e.name }));
@@ -32,6 +34,9 @@ export default async function SkillPage({
   if (!entry) notFound();
 
   const repoUrl = `https://github.com/${entry.repo}/tree/${entry.sha}`;
+  const readmeHtml = entry.readme_md
+    ? await renderMarkdown(entry.readme_md)
+    : null;
 
   return (
     <main className="min-h-screen">
@@ -77,14 +82,21 @@ export default async function SkillPage({
             </div>
           )}
 
-          <section className="prose prose-invert mb-12">
-            <h2 className="text-2xl font-semibold mb-4 tracking-[color:var(--tracking-display-tight)]">
-              What this skill does
-            </h2>
-            <p className="text-[color:var(--color-fg-muted)] leading-relaxed">
-              Full README rendering lands in Phase 3 polish. For now, click the
-              source link on the right to read it on GitHub.
-            </p>
+          <section className="mb-12">
+            {readmeHtml ? (
+              <Prose html={readmeHtml} />
+            ) : (
+              <>
+                <h2 className="text-2xl font-semibold mb-4 tracking-[color:var(--tracking-display-tight)]">
+                  What this skill does
+                </h2>
+                <p className="text-[color:var(--color-fg-muted)] leading-relaxed">
+                  This entry doesn&apos;t inline its README in the registry yet.
+                  Click the source link on the right to read the real one on
+                  GitHub.
+                </p>
+              </>
+            )}
           </section>
 
           <section className="mb-12">

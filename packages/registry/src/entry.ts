@@ -20,6 +20,13 @@ export type RegistryEntry = {
   tags: readonly string[];
   added_at: string; // ISO 8601
   deprecated?: boolean;
+  /**
+   * Optional inline README in Markdown. When present, the gallery renders
+   * this on the per-skill page. When absent, Phase 3 (future work) will
+   * fetch the real README from the skill's repo at the declared SHA.
+   * Bounded so a single entry can't bloat registry.json unreasonably.
+   */
+  readme_md?: string;
 };
 
 export type Registry = {
@@ -106,6 +113,16 @@ export function validateEntry(raw: unknown, i: number): ValidateResult {
 
   if (typeof e.added_at !== "string" || Number.isNaN(Date.parse(e.added_at))) {
     errors.push(`entry[${i}].added_at: must be an ISO 8601 timestamp`);
+  }
+
+  if (e.readme_md !== undefined) {
+    if (typeof e.readme_md !== "string") {
+      errors.push(`entry[${i}].readme_md: must be a string if present`);
+    } else if (e.readme_md.length > 40_000) {
+      errors.push(
+        `entry[${i}].readme_md: exceeds 40,000 char limit (got ${e.readme_md.length})`,
+      );
+    }
   }
 
   return errors.length === 0 ? { ok: true } : { ok: false, errors };
