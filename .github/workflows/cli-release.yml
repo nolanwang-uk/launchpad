@@ -237,7 +237,16 @@ jobs:
             echo "NPM_TOKEN secret not set — skipping publish."
             exit 0
           fi
-          npm publish --access public --provenance
+          # Prereleases (semver with '-') go to the 'dev' dist-tag so they
+          # never set 'latest' implicitly. Real releases land on 'latest'.
+          version="${GITHUB_REF_NAME#skillz-v}"
+          if [[ "$version" == *-* ]]; then
+            tag=dev
+          else
+            tag=latest
+          fi
+          echo "publishing $version to dist-tag '$tag'"
+          npm publish --access public --provenance --tag "$tag"
 
   bump-tap:
     name: bump Homebrew tap

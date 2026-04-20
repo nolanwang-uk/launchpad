@@ -13,8 +13,8 @@
   ],
   "license": "MIT",
   "bin": {
-    "launchpad": "./bin/skillz.js",
-    "skillz": "./bin/skillz.js"
+    "launchpad": "bin/skillz.js",
+    "skillz": "bin/skillz.js"
   },
   "files": [
     "bin/",
