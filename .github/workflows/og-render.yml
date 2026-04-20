@@ -1,0 +1,122 @@
+name: og-render
+
+# Renders per-skill OG images from the registry and commits them back to
+# packages/gallery/public/og/. Two modes:
+#
+# 1. PR to any registry change: render-all --force to a scratch dir, then
+#    diff against committed OGs. Surfaces what would change without
+#    committing. Fast feedback for registry PR authors.
+#
+# 2. Push to main that touches the registry: render-all (with cache),
+#    commit the updated PNGs. A dedicated bot account (via the deploy
+#    key) does the commit so the main branch's protected-branch rules
+#    stay intact.
+on:
+  pull_request:
+    paths:
+      - "packages/registry/registry.json"
+      - "packages/og-render/**"
+  push:
+    branches: [main]
+    paths:
+      - "packages/registry/registry.json"
+      - "packages/og-render/**"
+
+concurrency:
+  group: og-render-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write  # so the push job can commit the rendered PNGs
+
+jobs:
+  preview:
+    name: preview OG changes (pull_request)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+
+      - name: Install deps
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: bunx playwright install chromium --with-deps
+
+      - name: Render all (forced, to scratch)
+        run: |
+          mkdir -p /tmp/og-preview
+          bun packages/og-render/src/render-all.ts \
+            --force --out /tmp/og-preview
+
+      - name: Diff against committed OGs
+        run: |
+          existing=packages/gallery/public/og
+          new=/tmp/og-preview
+          changed=()
+          added=()
+          for f in "$new"/*.png; do
+            [ -f "$f" ] || continue
+            name=$(basename "$f")
+            if [ ! -f "$existing/$name" ]; then
+              added+=("$name")
+            elif ! cmp -s "$existing/$name" "$f"; then
+              changed+=("$name")
+            fi
+          done
+          echo "Added: ${added[*]:-none}"
+          echo "Changed: ${changed[*]:-none}"
+
+      - name: Upload preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: og-preview
+          path: /tmp/og-preview/
+          retention-days: 14
+
+  commit:
+    name: render + commit (main)
+    if: github.event_name == 'push'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need the full history so we can push back.
+          fetch-depth: 0
+          token: ${{ secrets.OG_COMMIT_TOKEN || github.token }}
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+
+      - name: Install deps
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: bunx playwright install chromium --with-deps
+
+      - name: Render (cache-aware)
+        run: bun packages/og-render/src/render-all.ts
+
+      - name: Commit if anything changed
+        run: |
+          git config user.name "launchpad-og-bot"
+          git config user.email "bot@launchpad.dev"
+          git add packages/gallery/public/og
+          if git diff --staged --quiet; then
+            echo "no OG changes — nothing to commit."
+            exit 0
+          fi
+          git commit \
+            -m "chore(og): regenerate OG images" \
+            -m "Auto-rendered by og-render.yml from the current registry.json." \
+            -m "Triggered by commit ${GITHUB_SHA::7}."
+          git push origin HEAD:main

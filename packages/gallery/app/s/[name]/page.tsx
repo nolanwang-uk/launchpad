@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { existsSync } from "node:fs";
+import * as path from "node:path";
 import { findEntry, loadRegistrySync } from "@/lib/registry";
 import { renderMarkdown } from "@/lib/markdown";
 import { CopyCommand } from "@/components/CopyCommand";
@@ -10,6 +12,17 @@ export function generateStaticParams() {
   return loadRegistrySync().entries.map((e) => ({ name: e.name }));
 }
 
+/**
+ * Resolve the per-skill OG image. Returns the rendered PNG path if it
+ * exists (committed by the og-render workflow), otherwise null so the
+ * site-default OG is used.
+ */
+function ogPathFor(name: string): string | null {
+  const rel = `/og/${name}.png`;
+  const abs = path.resolve(process.cwd(), "public", "og", `${name}.png`);
+  return existsSync(abs) ? rel : null;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -18,9 +31,26 @@ export async function generateMetadata({
   const { name } = await params;
   const entry = findEntry(name);
   if (!entry) return { title: "Skill not found · launchpad" };
+  const og = ogPathFor(entry.name);
   return {
     title: `${entry.name} · launchpad`,
     description: entry.description,
+    openGraph: og
+      ? {
+          title: `${entry.name} — ${entry.tier} skill`,
+          description: entry.description,
+          type: "article",
+          images: [{ url: og, width: 1200, height: 630, alt: entry.name }],
+        }
+      : undefined,
+    twitter: og
+      ? {
+          card: "summary_large_image",
+          title: `${entry.name} — ${entry.tier} skill`,
+          description: entry.description,
+          images: [og],
+        }
+      : undefined,
   };
 }
 

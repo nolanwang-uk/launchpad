@@ -1,0 +1,21 @@
+{
+  "name": "@launchpad/og-render",
+  "version": "0.1.0-dev.0",
+  "private": true,
+  "description": "Renders per-skill OG images from the registry via Playwright + a styled HTML template.",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "render": "bun src/render-all.ts"
+  },
+  "dependencies": {
+    "@launchpad/registry": "workspace:*",
+    "playwright": "^1.48.2"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.14",
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
+  }
+}
