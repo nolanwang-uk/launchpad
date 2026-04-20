@@ -76,6 +76,15 @@
         "typescript": "^5.6.3",
       },
     },
+    "packages/proxy": {
+      "name": "@launchpad/proxy",
+      "version": "0.1.0-dev.0",
+      "devDependencies": {
+        "@types/bun": "^1.1.14",
+        "@types/node": "^22.9.0",
+        "typescript": "^5.6.3",
+      },
+    },
     "packages/registry": {
       "name": "@launchpad/registry",
       "version": "0.1.0-dev.0",
@@ -144,6 +153,8 @@
     "@launchpad/gallery": ["@launchpad/gallery@workspace:packages/gallery"],
 
     "@launchpad/og-render": ["@launchpad/og-render@workspace:packages/og-render"],
+
+    "@launchpad/proxy": ["@launchpad/proxy@workspace:packages/proxy"],
 
     "@launchpad/registry": ["@launchpad/registry@workspace:packages/registry"],
 

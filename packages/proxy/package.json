@@ -1,0 +1,17 @@
+{
+  "name": "@launchpad/proxy",
+  "version": "0.1.0-dev.0",
+  "private": true,
+  "description": "Vercel Edge Function that proxies codeload.github.com with immutable caching, keyed by commit SHA.",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "dev": "vercel dev"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.14",
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
+  }
+}

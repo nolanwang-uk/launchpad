@@ -70,32 +70,29 @@ export function parseRepoArg(arg: string, declaredSha?: string): RepoRef {
  */
 export async function fetchAndExtract(ref: RepoRef): Promise<string> {
   const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), "skillz-"));
-  const url = `https://codeload.github.com/${ref.owner}/${ref.name}/tar.gz/${ref.sha}`;
 
-  const res = await fetch(url).catch((e: unknown) => {
+  // Prefer the Launchpad edge proxy (E-I1) for GitHub rate-limit avoidance
+  // at launch scale; fall back to codeload.github.com if the proxy is
+  // unreachable or returns 5xx. Policy + tests live in archive-url.ts.
+  const { fetchArchiveWithFallback } = await import("./archive-url");
+  const result = await fetchArchiveWithFallback({ ref });
+
+  if (result.kind === "error") {
     throw err(
       "fetch-failed",
       "could not download the skill archive",
-      `GET ${url} failed: ${e instanceof Error ? e.message : String(e)}.`,
-      "check your network, or confirm the SHA exists in the source repo.",
-      EXIT.NETWORK,
-    );
-  });
-
-  if (!res.ok) {
-    throw err(
-      "fetch-status",
-      `archive download returned HTTP ${res.status}`,
-      `${url} returned ${res.status} ${res.statusText}. Common causes: SHA missing from repo, repo is private, GitHub rate-limit.`,
-      res.status === 403
+      `both the Launchpad edge proxy and codeload.github.com failed: ${result.message}.`,
+      result.status === 403
         ? "wait a few minutes (GitHub unauth rate limit is 60/hr), or authenticate via `gh auth login`."
-        : "verify the SHA and repo exist on GitHub.",
+        : result.status === 404
+          ? "verify the SHA and repo exist on GitHub — codeload returned 404 authoritatively."
+          : "check your network, or set SKILLZ_ARCHIVE_BASE to a proxy you control.",
       EXIT.NETWORK,
     );
   }
 
   const tarballPath = path.join(tmpRoot, "archive.tgz");
-  const buf = new Uint8Array(await res.arrayBuffer());
+  const buf = new Uint8Array(await result.res.arrayBuffer());
   await fs.writeFile(tarballPath, buf);
 
   // Extract via system `tar`. Bun has no built-in tar extraction.
