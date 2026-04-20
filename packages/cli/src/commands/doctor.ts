@@ -74,9 +74,18 @@ export async function doctorCommand(): Promise<{ code: number }> {
     critical: true,
   });
 
-  const sh = await checkBinary("/bin/sh");
+  // We don't probe `/bin/sh --version` — dash (Ubuntu's /bin/sh) exits
+  // nonzero for that. Check executability instead, which is what the
+  // scrubbed-env spawn actually needs.
+  let sh = false;
+  try {
+    await fs.access("/bin/sh", (await import("node:fs")).constants.X_OK);
+    sh = true;
+  } catch {
+    sh = false;
+  }
   checks.push({
-    name: "/bin/sh available",
+    name: "/bin/sh executable",
     ok: sh,
     detail: sh ? "available" : "install_commands exec requires /bin/sh",
     critical: true,
