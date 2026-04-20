@@ -69,15 +69,38 @@ export default async function SkillPage({
     : null;
 
   return (
-    <main className="min-h-screen">
-      <nav className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+    <main id="main" className="min-h-screen">
+      <nav className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
         <Link
           href="/"
-          className="font-semibold text-lg tracking-[color:var(--tracking-display-tight)]"
+          className="font-semibold text-lg tracking-[color:var(--tracking-display-tight)] py-3 inline-flex items-center min-h-[44px]"
         >
           ← launchpad
         </Link>
       </nav>
+
+      {/* Mobile primary-action bar — sticky directly under nav so install
+          commands are one thumb-scroll away (D5 spec on small screens). */}
+      <div className="lg:hidden sticky top-0 z-20 bg-[color:var(--color-bg)]/90 backdrop-blur-sm border-b border-[color:var(--color-border)]">
+        <div className="max-w-6xl mx-auto px-6 py-2 flex items-center gap-3">
+          <TierBadge tier={entry.tier} size="sm" />
+          <span className="text-sm font-semibold truncate flex-1">
+            {entry.name}
+          </span>
+          <a
+            href="#install-rail"
+            className={[
+              "shrink-0 text-xs font-medium",
+              "px-3 py-2 min-h-[44px] inline-flex items-center",
+              "bg-[color:var(--color-fg)] text-[color:var(--color-bg)]",
+              "hover:bg-[color:var(--color-accent-muted)]",
+              "rounded-md transition-colors",
+            ].join(" ")}
+          >
+            Install ↓
+          </a>
+        </div>
+      </div>
 
       <div className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
         {/* Main column */}
@@ -154,8 +177,13 @@ export default async function SkillPage({
           </section>
         </article>
 
-        {/* Sticky rail (D5) */}
-        <aside className="lg:sticky lg:top-6 self-start space-y-6">
+        {/* Sticky rail (D5). On mobile the rail stacks below the main
+            article; the sticky mobile top bar above jumps here via
+            #install-rail when the user taps "Install ↓". */}
+        <aside
+          id="install-rail"
+          className="lg:sticky lg:top-6 self-start space-y-6 scroll-mt-20"
+        >
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-widest text-[color:var(--color-fg-subtle)]">
               Run once (recommended)

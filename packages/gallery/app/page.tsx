@@ -11,15 +11,12 @@ export default function HomePage() {
   const newThisWeek = registry.entries.slice(0, 6);
 
   return (
-    <main className="min-h-screen">
+    <main id="main" className="min-h-screen">
       {/* Top nav — intentionally minimal */}
       <Nav />
 
       {/* Hero */}
-      <section className="max-w-5xl mx-auto px-6 pt-24 md:pt-32 pb-20 md:pb-28">
-        <p className="text-sm text-[color:var(--color-fg-subtle)] mb-4 font-[family-name:var(--font-mono)]">
-          launchpad · v0.1.0-dev
-        </p>
+      <section className="max-w-5xl mx-auto px-6 pt-16 md:pt-24 pb-20 md:pb-28">
         <h1 className="text-5xl md:text-7xl font-semibold tracking-[color:var(--tracking-display-tight)] leading-[1.02] mb-8 max-w-4xl">
           One command. Any Claude Code skill.
         </h1>
@@ -36,7 +33,7 @@ export default function HomePage() {
             <div className="flex items-baseline gap-3 mb-2">
               <Link
                 href={`/s/${featured.name}`}
-                className="text-2xl md:text-3xl font-semibold hover:text-[color:var(--color-accent)] transition-colors"
+                className="text-2xl md:text-3xl font-semibold hover:text-[color:var(--color-accent)] transition-colors py-2 -my-2 inline-flex items-center min-h-[44px]"
               >
                 {featured.name}
               </Link>
@@ -49,15 +46,17 @@ export default function HomePage() {
               size="hero"
               command={`npx launchpad run ${featured.name}`}
             />
-            <p className="text-xs text-[color:var(--color-fg-subtle)] mt-3 max-w-xl">
-              Zero install. Works on any dev machine with Node. Heavy user?{" "}
+            <div className="mt-3 max-w-xl flex flex-col sm:flex-row sm:items-baseline sm:gap-3">
+              <p className="text-xs text-[color:var(--color-fg-subtle)]">
+                Zero install. Works on any dev machine with Node.
+              </p>
               <a
                 href="#install"
-                className="underline decoration-dotted underline-offset-4 hover:text-[color:var(--color-fg)]"
+                className="self-start text-xs underline decoration-dotted underline-offset-4 hover:text-[color:var(--color-fg)] py-2 inline-flex items-center min-h-[44px]"
               >
-                install via Homebrew →
+                Heavy user? Install via Homebrew →
               </a>
-            </p>
+            </div>
           </div>
         )}
 
@@ -86,10 +85,33 @@ export default function HomePage() {
         {newThisWeek.length === 0 ? (
           <EmptyRegistry />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          // Auto-fit so a single card doesn't leave 2 empty grid cells.
+          // With 1 skill the card fills the row; at 2 it splits; at 3+ it
+          // fills a 3-column grid at max-width.
+          <div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(20rem,1fr))]">
             {newThisWeek.map((entry) => (
               <SkillCard key={entry.name} entry={entry} />
             ))}
+            {newThisWeek.length < 3 && (
+              <div
+                className={[
+                  "rounded-lg border border-dashed",
+                  "border-[color:var(--color-border)]",
+                  "p-5 flex items-center justify-center text-center",
+                  "text-sm text-[color:var(--color-fg-subtle)]",
+                  "min-h-[9rem]",
+                ].join(" ")}
+              >
+                More skills landing soon.
+                <br />
+                <a
+                  href="/docs/build-your-first-skill"
+                  className="underline decoration-dotted underline-offset-4 hover:text-[color:var(--color-fg)]"
+                >
+                  Submit one →
+                </a>
+              </div>
+            )}
           </div>
         )}
       </section>
@@ -144,29 +166,29 @@ export default function HomePage() {
 
 function Nav() {
   return (
-    <nav className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
+    <nav className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
       <Link
         href="/"
-        className="font-semibold text-lg tracking-[color:var(--tracking-display-tight)]"
+        className="font-semibold text-lg tracking-[color:var(--tracking-display-tight)] py-3 inline-flex items-center min-h-[44px]"
       >
         launchpad
       </Link>
-      <div className="flex items-center gap-6 text-sm text-[color:var(--color-fg-muted)]">
+      <div className="flex items-center gap-2 sm:gap-4 text-sm text-[color:var(--color-fg-muted)]">
         <a
           href="#install"
-          className="hover:text-[color:var(--color-fg)] transition-colors"
+          className="hover:text-[color:var(--color-fg)] transition-colors px-2 py-3 inline-flex items-center min-h-[44px]"
         >
           install
         </a>
         <a
           href="/docs"
-          className="hover:text-[color:var(--color-fg)] transition-colors"
+          className="hover:text-[color:var(--color-fg)] transition-colors px-2 py-3 inline-flex items-center min-h-[44px]"
         >
           docs
         </a>
         <a
           href="https://github.com/nolanwang-uk/launchpad"
-          className="hover:text-[color:var(--color-fg)] transition-colors"
+          className="hover:text-[color:var(--color-fg)] transition-colors px-2 py-3 inline-flex items-center min-h-[44px]"
         >
           github
         </a>
@@ -225,17 +247,38 @@ function EmptyRegistry() {
 }
 
 function Footer() {
+  // Version shown here isn't the npm package version (server component
+  // doesn't have reliable access without a build-time env var), but a
+  // monotonic signal that the footer is real. Linked to releases so users
+  // can self-serve the provenance chain.
   return (
     <footer className="max-w-5xl mx-auto px-6 py-12 border-t border-[color:var(--color-border)] text-sm text-[color:var(--color-fg-subtle)]">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <p>launchpad — a skill marketplace for Claude Code.</p>
-        <div className="flex gap-6">
-          <a href="/privacy" className="hover:text-[color:var(--color-fg)]">
+        <p className="py-2">
+          launchpad — a skill marketplace for Claude Code.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href="https://github.com/nolanwang-uk/launchpad/releases"
+            className="hover:text-[color:var(--color-fg)] px-2 py-3 inline-flex items-center min-h-[44px]"
+          >
+            releases
+          </a>
+          <a
+            href="/docs/security-model"
+            className="hover:text-[color:var(--color-fg)] px-2 py-3 inline-flex items-center min-h-[44px]"
+          >
+            security
+          </a>
+          <a
+            href="/docs/privacy"
+            className="hover:text-[color:var(--color-fg)] px-2 py-3 inline-flex items-center min-h-[44px]"
+          >
             privacy
           </a>
           <a
             href="https://github.com/nolanwang-uk/launchpad"
-            className="hover:text-[color:var(--color-fg)]"
+            className="hover:text-[color:var(--color-fg)] px-2 py-3 inline-flex items-center min-h-[44px]"
           >
             github
           </a>

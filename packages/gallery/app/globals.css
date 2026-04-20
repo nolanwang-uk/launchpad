@@ -47,6 +47,29 @@
     color: var(--color-bg);
   }
 
+  /* Visited-link affordance — subtle but real. Users need to be able to
+     tell they've already read a page. Dims the underline and text slightly
+     (not so much that the link looks disabled). Scoped to prose + internal
+     anchors so external CTA buttons aren't affected. */
+  .skillz-prose a:visited {
+    color: var(--color-fg-muted);
+    text-decoration-color: var(--color-fg-subtle);
+  }
+  nav a:visited,
+  aside a:visited {
+    color: var(--color-fg-subtle);
+  }
+
+  /* Docs mobile disclosure: uses a native <details> on small screens to
+     collapse the 7-link TOC. On desktop the summary is hidden; force the
+     content to render regardless of the details [open] state so the
+     sidebar works normally. */
+  @media (min-width: 1024px) {
+    details.docs-nav > *:not(summary) {
+      display: block !important;
+    }
+  }
+
   /* Reduce motion by default when the user asks. Respected everywhere. */
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -86,6 +109,7 @@
 }
 .skillz-prose h1 { font-size: 2rem; }
 .skillz-prose h2 { font-size: 1.5rem; border-top: 1px solid var(--color-border); padding-top: 1.5em; }
+.skillz-prose > h2:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
 .skillz-prose h3 { font-size: 1.15rem; color: var(--color-fg-muted); }
 .skillz-prose h4 { font-size: 1rem; color: var(--color-fg-muted); }
 .skillz-prose p,

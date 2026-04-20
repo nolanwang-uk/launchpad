@@ -23,9 +23,9 @@ export function TerminalPreview({
       aria-label={`Terminal preview of running ${skillName}`}
     >
       <div className="flex items-center gap-1.5 px-4 py-3 border-b border-[color:var(--color-border)]">
-        <span className="w-3 h-3 rounded-full bg-red-500/70" />
-        <span className="w-3 h-3 rounded-full bg-yellow-500/70" />
-        <span className="w-3 h-3 rounded-full bg-green-500/70" />
+        <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+        <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+        <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
         <span className="ml-3 text-xs text-[color:var(--color-fg-subtle)]">
           ~/.claude/skills
         </span>

@@ -14,8 +14,8 @@ export function TierBadge({
 }) {
   const base =
     size === "md"
-      ? "text-xs px-2.5 py-1 gap-1.5"
-      : "text-[11px] px-2 py-0.5 gap-1";
+      ? "text-sm px-2.5 py-1 gap-1.5"
+      : "text-xs px-2 py-0.5 gap-1";
 
   if (tier === "Reviewed") {
     return (
@@ -54,8 +54,8 @@ function CheckGlyph() {
   return (
     <svg
       aria-hidden="true"
-      width="10"
-      height="10"
+      width="12"
+      height="12"
       viewBox="0 0 16 16"
       fill="none"
     >
@@ -74,8 +74,8 @@ function BranchGlyph() {
   return (
     <svg
       aria-hidden="true"
-      width="10"
-      height="10"
+      width="12"
+      height="12"
       viewBox="0 0 16 16"
       fill="none"
     >
