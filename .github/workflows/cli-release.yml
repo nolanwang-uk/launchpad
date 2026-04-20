@@ -281,18 +281,29 @@ jobs:
           mv /tmp/skillz.rb.new packages/homebrew/Formula/skillz.rb
           cat packages/homebrew/Formula/skillz.rb
 
-      - name: Push to tap repo
+      - name: Push to tap repo (SSH via deploy key)
         env:
-          TAP_TOKEN: ${{ secrets.TAP_DEPLOY_KEY }}
+          TAP_SSH_KEY: ${{ secrets.TAP_DEPLOY_KEY }}
         run: |
-          if [ -z "$TAP_TOKEN" ]; then
+          if [ -z "$TAP_SSH_KEY" ]; then
             echo "TAP_DEPLOY_KEY not set — tap bump skipped (render only)."
             exit 0
           fi
+
+          # Load the ed25519 deploy key into an ssh-agent for the duration
+          # of this step. Deploy key has write access scoped to the tap repo
+          # only — strictly less privilege than a user PAT would be.
+          eval "$(ssh-agent -s)"
+          printf '%s\n' "$TAP_SSH_KEY" | ssh-add - >/dev/null 2>&1
+
+          # github.com host key — pinned to avoid a TOFU prompt.
+          mkdir -p ~/.ssh
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+
           git config --global user.name "launchpad-release-bot"
           git config --global user.email "bot@launchpad.dev"
           tapdir=$(mktemp -d)
-          git clone "https://x-access-token:${TAP_TOKEN}@github.com/nolanwang-uk/homebrew-tap.git" "$tapdir"
+          git clone git@github.com:nolanwang-uk/homebrew-tap.git "$tapdir"
           cp packages/homebrew/Formula/skillz.rb "$tapdir/Formula/skillz.rb"
           cd "$tapdir"
           git add Formula/skillz.rb
