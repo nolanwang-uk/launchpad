@@ -37,5 +37,5 @@ use WSL. A native Windows binary is on the v2 roadmap.
 ## Links
 
 - Gallery: https://launchpad.dev
-- Source / issues: https://github.com/launchpad-skills/launchpad
+- Source / issues: https://github.com/nolanwang-uk/launchpad
 - Security model: https://launchpad.dev/docs/security

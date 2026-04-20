@@ -68,7 +68,7 @@ git rev-parse HEAD
 
 ## 5. Submit a registry PR
 
-Fork `launchpad-skills/launchpad` and add an entry to `packages/registry/registry.json`:
+Fork `nolanwang-uk/launchpad` and add an entry to `packages/registry/registry.json`:
 
 ```json
 {

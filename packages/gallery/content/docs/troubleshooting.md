@@ -73,7 +73,7 @@ skillz run foo --yes --i-accept-risk
 
 **Why:** `skillz verify` found that the local binary's hash doesn't match the hash in the release's `SHASUMS256.txt`. Someone has either tampered with the binary, tampered with `SHASUMS256.txt`, or you accidentally downloaded a different release's SHASUMS.
 
-**Fix:** re-download both files from [the latest release](https://github.com/launchpad-skills/launchpad/releases/latest) and re-run `skillz verify`. If it still fails, do not use the binary; file an issue.
+**Fix:** re-download both files from [the latest release](https://github.com/nolanwang-uk/launchpad/releases/latest) and re-run `skillz verify`. If it still fails, do not use the binary; file an issue.
 
 ## `error: unsupported-platform`
 
@@ -84,5 +84,5 @@ skillz run foo --yes --i-accept-risk
 ## Still stuck?
 
 - Run `skillz doctor` — it checks the most common environment assumptions.
-- Search [issues on GitHub](https://github.com/launchpad-skills/launchpad/issues).
+- Search [issues on GitHub](https://github.com/nolanwang-uk/launchpad/issues).
 - If you're a skill author, `skillz validate .` locally usually catches the specific thing causing CI to reject your PR.

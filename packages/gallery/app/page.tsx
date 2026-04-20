@@ -165,7 +165,7 @@ function Nav() {
           docs
         </a>
         <a
-          href="https://github.com/launchpad-skills/registry"
+          href="https://github.com/nolanwang-uk/launchpad"
           className="hover:text-[color:var(--color-fg)] transition-colors"
         >
           github
@@ -215,7 +215,7 @@ function EmptyRegistry() {
         The registry is empty. Be the first to submit a skill.
       </p>
       <a
-        href="https://github.com/launchpad-skills/registry"
+        href="https://github.com/nolanwang-uk/launchpad"
         className="inline-block text-sm underline decoration-dotted underline-offset-4 hover:text-[color:var(--color-fg)]"
       >
         Open a PR to the registry →
@@ -234,7 +234,7 @@ function Footer() {
             privacy
           </a>
           <a
-            href="https://github.com/launchpad-skills/registry"
+            href="https://github.com/nolanwang-uk/launchpad"
             className="hover:text-[color:var(--color-fg)]"
           >
             github

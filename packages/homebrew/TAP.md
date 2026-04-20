@@ -2,18 +2,18 @@
 
 This directory is the source of truth for the Homebrew tap that publishes
 the `skillz` CLI. At release time, the contents of `Formula/` are pushed to
-the `launchpad-skills/homebrew-tap` repo by the `cli-release.yml` workflow.
+the `nolanwang-uk/homebrew-tap` repo by the `cli-release.yml` workflow.
 
 ## Install (once we cut the first public release)
 
 ```
-brew install launchpad-skills/tap/skillz
+brew install nolanwang-uk/tap/skillz
 ```
 
 or long-form:
 
 ```
-brew tap launchpad-skills/tap
+brew tap nolanwang-uk/tap
 brew install skillz
 ```
 
@@ -23,7 +23,7 @@ brew install skillz
 2. `cli-release.yml` builds the 4 binaries, signs the SHASUMS, creates a
    GitHub release.
 3. The same workflow opens a PR (or commits direct, depending on config)
-   against `launchpad-skills/homebrew-tap` with the new URLs + sha256
+   against `nolanwang-uk/homebrew-tap` with the new URLs + sha256
    values for each platform inside `Formula/skillz.rb`.
 4. The PR merges → `brew update && brew upgrade skillz` pulls the new build.
 

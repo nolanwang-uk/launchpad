@@ -16,7 +16,7 @@ export type VerifyOpts = {
 };
 
 const RELEASE_URL =
-  "https://github.com/launchpad-skills/launchpad/releases/latest";
+  "https://github.com/nolanwang-uk/launchpad/releases/latest";
 
 function detectAssetName(): string {
   const platform = process.platform; // "darwin" | "linux" | ...
@@ -47,7 +47,7 @@ async function cosignVerify(
       [
         "verify-blob",
         "--certificate-identity-regexp",
-        "^https://github.com/launchpad-skills/launchpad/.*",
+        "^https://github.com/nolanwang-uk/launchpad/.*",
         "--certificate-oidc-issuer",
         "https://token.actions.githubusercontent.com",
         "--bundle",
@@ -173,7 +173,7 @@ export async function verifyCommand(
             `    issuer: https://token.actions.githubusercontent.com\n`,
           );
           process.stdout.write(
-            `    identity: ^https://github.com/launchpad-skills/launchpad/.*\n`,
+            `    identity: ^https://github.com/nolanwang-uk/launchpad/.*\n`,
           );
           break;
         case "cosign-missing":

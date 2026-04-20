@@ -18,7 +18,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
             docs
           </Link>
           <a
-            href="https://github.com/launchpad-skills/launchpad"
+            href="https://github.com/nolanwang-uk/launchpad"
             className="hover:text-[color:var(--color-fg)]"
           >
             github

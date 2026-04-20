@@ -64,4 +64,4 @@ The `registry-validate.yml` workflow blocks the PR unless all of these pass:
 
 Deep per-entry validation — fetching `skill.yml` at the declared SHA and re-running the analyzer against it — is v1.1. Today we rely on authors running `skillz validate` locally before opening the PR.
 
-For the Reviewed tier, a human maintainer still audits per the checklist in [`packages/registry/AUDIT.md`](https://github.com/launchpad-skills/launchpad/blob/main/packages/registry/AUDIT.md) (capacity: 2 hrs/week; beyond that, skills land as Community).
+For the Reviewed tier, a human maintainer still audits per the checklist in [`packages/registry/AUDIT.md`](https://github.com/nolanwang-uk/launchpad/blob/main/packages/registry/AUDIT.md) (capacity: 2 hrs/week; beyond that, skills land as Community).

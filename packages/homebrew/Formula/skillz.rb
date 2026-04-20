@@ -12,22 +12,22 @@ class Skillz < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/launchpad-skills/launchpad/releases/download/skillz-v#{version}/skillz-darwin-arm64"
+      url "https://github.com/nolanwang-uk/launchpad/releases/download/skillz-v#{version}/skillz-darwin-arm64"
       sha256 PLACEHOLDER
     end
     on_intel do
-      url "https://github.com/launchpad-skills/launchpad/releases/download/skillz-v#{version}/skillz-darwin-x64"
+      url "https://github.com/nolanwang-uk/launchpad/releases/download/skillz-v#{version}/skillz-darwin-x64"
       sha256 PLACEHOLDER
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/launchpad-skills/launchpad/releases/download/skillz-v#{version}/skillz-linux-arm64"
+      url "https://github.com/nolanwang-uk/launchpad/releases/download/skillz-v#{version}/skillz-linux-arm64"
       sha256 PLACEHOLDER
     end
     on_intel do
-      url "https://github.com/launchpad-skills/launchpad/releases/download/skillz-v#{version}/skillz-linux-x64"
+      url "https://github.com/nolanwang-uk/launchpad/releases/download/skillz-v#{version}/skillz-linux-x64"
       sha256 PLACEHOLDER
     end
   end
@@ -41,7 +41,7 @@ class Skillz < Formula
     when [false, true, true, false] then "skillz-linux-arm64"
     when [false, true, false, true] then "skillz-linux-x64"
     else
-      odie "unsupported platform — file an issue at https://github.com/launchpad-skills/launchpad"
+      odie "unsupported platform — file an issue at https://github.com/nolanwang-uk/launchpad"
     end
 
     bin.install bin_path => "skillz"

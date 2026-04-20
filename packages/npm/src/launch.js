@@ -74,7 +74,7 @@ function missingBinaryHelp(target, binaryPath) {
     "error: the skillz binary for " + target + " is missing from this package\n" +
     "why:   the npm package is corrupted — vendor/" + target +
     "/skillz is not present at " + binaryPath + ".\n" +
-    "fix:   reinstall with `npm i -g launchpad@latest`, or download the binary directly from https://github.com/launchpad-skills/launchpad/releases/latest\n" +
+    "fix:   reinstall with `npm i -g launchpad@latest`, or download the binary directly from https://github.com/nolanwang-uk/launchpad/releases/latest\n" +
     "more:  https://launchpad.dev/docs/errors/npm-corrupt\n"
   );
 }
