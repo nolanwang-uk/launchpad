@@ -20,25 +20,9 @@ concurrency:
 
 jobs:
   build:
-    name: build ${{ matrix.target }}
-    runs-on: ${{ matrix.os }}
+    name: build all 4 targets (cross-compiled via Bun)
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - os: macos-14
-            target: darwin-arm64
-            bun_target: bun-darwin-arm64
-          - os: macos-13
-            target: darwin-x64
-            bun_target: bun-darwin-x64
-          - os: ubuntu-22.04-arm
-            target: linux-arm64
-            bun_target: bun-linux-arm64
-          - os: ubuntu-22.04
-            target: linux-x64
-            bun_target: bun-linux-x64
     steps:
       - uses: actions/checkout@v4
 
@@ -50,28 +34,43 @@ jobs:
       - name: Install deps
         run: bun install --frozen-lockfile
 
-      - name: Build binary
+      - name: Cross-compile all 4 binaries
         working-directory: packages/cli
+        # Bun's `--compile --target=bun-<os>-<arch>` works from any host.
+        # Cross-compiling on one ubuntu runner is ~2x faster than the 4-way
+        # matrix, uses only Linux minutes, and avoids GitHub's scarce
+        # macos-13 Intel runner pool. We give up per-target native
+        # smoke-testing here, but ci.yml already runs the Linux binary
+        # end-to-end on every PR.
         run: |
           mkdir -p dist
-          bun build src/index.ts \
-            --compile \
-            --minify \
-            --target=${{ matrix.bun_target }} \
-            --outfile dist/skillz-${{ matrix.target }}
+          for pair in \
+            "darwin-arm64:bun-darwin-arm64" \
+            "darwin-x64:bun-darwin-x64" \
+            "linux-arm64:bun-linux-arm64" \
+            "linux-x64:bun-linux-x64"; do
+            target="${pair%%:*}"
+            bun_target="${pair##*:}"
+            echo "::group::build $target"
+            bun build src/index.ts \
+              --compile --minify \
+              --target="$bun_target" \
+              --outfile "dist/skillz-$target"
+            ls -lh "dist/skillz-$target"
+            echo "::endgroup::"
+          done
 
-      - name: Smoke test binary (darwin only; Linux runners can't run the ARM64 macOS binary)
-        if: matrix.target == 'darwin-arm64'
+      - name: Smoke test the linux-x64 binary (we're on x64 Ubuntu)
         working-directory: packages/cli
         run: |
-          ./dist/skillz-${{ matrix.target }} --version
-          ./dist/skillz-${{ matrix.target }} --help | head -5
+          ./dist/skillz-linux-x64 --version
+          ./dist/skillz-linux-x64 --help | head -5
 
-      - name: Upload artifact
+      - name: Upload one artifact per target
         uses: actions/upload-artifact@v4
         with:
-          name: skillz-${{ matrix.target }}
-          path: packages/cli/dist/skillz-${{ matrix.target }}
+          name: skillz-binaries
+          path: packages/cli/dist/skillz-*
           if-no-files-found: error
 
   sign-and-release:
@@ -82,19 +81,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download all artifacts
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          name: skillz-binaries
+          path: release
 
-      - name: Flatten + generate SHASUMS256.txt
+      - name: Generate SHASUMS256.txt
+        working-directory: release
         run: |
-          mkdir -p release
-          # Each artifact lands in its own subdir named after the artifact.
-          for dir in artifacts/*/; do
-            cp "$dir"* release/
-          done
-          cd release
           ls -la
           sha256sum skillz-* > SHASUMS256.txt
           cat SHASUMS256.txt
@@ -207,9 +202,10 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org
 
-      - name: Download per-target artifacts
+      - name: Download the bundled binaries artifact
         uses: actions/download-artifact@v4
         with:
+          name: skillz-binaries
           path: artifacts
 
       - name: Vendor binaries into the npm package
@@ -217,7 +213,7 @@ jobs:
           cd packages/npm
           for t in darwin-arm64 darwin-x64 linux-arm64 linux-x64; do
             mkdir -p "vendor/$t"
-            cp "../../artifacts/skillz-$t/skillz-$t" "vendor/$t/skillz"
+            cp "../../artifacts/skillz-$t" "vendor/$t/skillz"
             chmod +x "vendor/$t/skillz"
           done
           ls -la vendor/*/
