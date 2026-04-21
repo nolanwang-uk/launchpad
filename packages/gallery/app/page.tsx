@@ -28,8 +28,20 @@ import { UserMenu } from "@/components/UserMenu";
 
 export default function HomePage() {
   const registry = loadRegistrySync();
+  // Featured-this-week should never be the editorial seed (hello-world)
+  // — it's a smoke-test entry, not a practitioner's real work. Prefer
+  // Verified + real-practitioner bylines, sorted by freshness.
+  const isEditorialSeed = (e: RegistryEntry) =>
+    (e.author_slug ?? deriveAuthorSlug(e.author)) === "launchpad-editorial";
   const verified = registry.entries.filter((e) => e.tier === "Reviewed");
-  const featured = verified[0] ?? registry.entries[0];
+  const eligible = verified
+    .filter((e) => !isEditorialSeed(e))
+    .sort((a, b) => Date.parse(b.added_at) - Date.parse(a.added_at));
+  const featured =
+    eligible[0] ??
+    verified[0] ??
+    registry.entries.find((e) => !isEditorialSeed(e)) ??
+    registry.entries[0];
   const recent = registry.entries.slice(0, 6);
   const domainCounts = countByDomain(registry.entries);
   const updatedAt = registry.updated_at;
