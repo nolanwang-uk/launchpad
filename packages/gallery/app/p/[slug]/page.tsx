@@ -201,7 +201,13 @@ export default async function PractitionerPage({
               <HireCTA
                 href={`/engage/practitioner-${p.slug}`}
                 label="Hire this practitioner"
-                priceLabel="Request engagement"
+                priceLabel={
+                  priceRange
+                    ? priceRange.min === priceRange.max
+                      ? `From $${Math.round(priceRange.min / 100)}`
+                      : `From $${Math.round(priceRange.min / 100)}`
+                    : "1 business day"
+                }
                 size="lg"
               />
               <span className="text-[11px] uppercase tracking-[0.16em] text-[color:var(--color-fg-subtle)]">
