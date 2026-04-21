@@ -739,14 +739,14 @@ function FooterLink({
       {external ? (
         <a
           href={href}
-          className="text-sm text-[color:var(--color-fg)] hover:text-[color:var(--color-accent)] transition-colors py-1.5 inline-flex items-center min-h-[32px]"
+          className="text-sm text-[color:var(--color-fg)] hover:text-[color:var(--color-accent)] transition-colors py-2.5 inline-flex items-center min-h-[44px]"
         >
           {children}
         </a>
       ) : (
         <Link
           href={href}
-          className="text-sm text-[color:var(--color-fg)] hover:text-[color:var(--color-accent)] transition-colors py-1.5 inline-flex items-center min-h-[32px]"
+          className="text-sm text-[color:var(--color-fg)] hover:text-[color:var(--color-accent)] transition-colors py-2.5 inline-flex items-center min-h-[44px]"
         >
           {children}
         </Link>
