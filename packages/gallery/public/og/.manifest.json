@@ -1,3 +1,18 @@
 {
-  "hello-world": "93f38f861630f4e7"
+  "hello-world": "1a31352c2130074c",
+  "sec-10k-reviewer": "149f81cab7b6bad9",
+  "patent-prior-art-scanner": "a55da801c4a58b6d",
+  "icd10-chart-auditor": "87cb9c379cb9bc46",
+  "clinical-trial-protocol-reader": "4fd5a21e04f95af9",
+  "saas-arr-bridge": "a54182f4cb2811a8",
+  "pr-description-writer": "a28237abefb0e759",
+  "release-notes-writer": "c853200eb73afdfc",
+  "flaky-test-triage": "0b0d8888a5ae23b0",
+  "otel-trace-explainer": "9f3dbd56db83e9da",
+  "postgres-query-optimizer": "67593f84c4cc8b4c",
+  "cve-patch-advisor": "e92bb1cd1fb2c6cc",
+  "mcp-server-auditor": "2a5b9fe58da9c6bd",
+  "dbt-model-review": "4e99d4f23f3168d2",
+  "employment-offer-letter-review": "d584216f7bb9e2f8",
+  "independent-1099-reconciler": "5f58d71e7250f63e"
 }
