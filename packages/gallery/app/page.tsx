@@ -292,7 +292,7 @@ function FeaturedPractitioner({ entry }: { entry: RegistryEntry }) {
     <article className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-8 lg:gap-12 items-start">
       <Link
         href={`/p/${slug}`}
-        className="flex flex-row lg:flex-col items-start gap-4 lg:w-48 group"
+        className="flex flex-row lg:flex-col items-start gap-4 lg:w-48 group py-2 -my-2 min-h-[44px]"
       >
         <PractitionerMark name={entry.author} size="lg" />
         <div className="lg:mt-2">
