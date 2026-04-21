@@ -168,6 +168,12 @@ export default async function EngagePage({
                   ? `Skill: ${resolved.entry.name}`
                   : `Practitioner: ${practitionerName}`
               }
+              targetKind={resolved.kind}
+              targetSlug={
+                resolved.kind === "skill"
+                  ? resolved.entry.name
+                  : resolved.practitioner.slug
+              }
             />
 
             <p className="text-xs text-[color:var(--color-fg-subtle)] leading-relaxed mt-6 max-w-xl">

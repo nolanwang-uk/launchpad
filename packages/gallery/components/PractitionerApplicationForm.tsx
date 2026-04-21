@@ -3,54 +3,88 @@
 import { useState } from "react";
 
 /**
- * Practitioner-application form. Supply-side counterpart to
- * InquiryForm. Same mailto: handoff pattern — no backend in v1. The
- * editorial team reviews credentials, schedules a call, and publishes
- * as Verified if everything checks out.
+ * Practitioner-application form — supply-side counterpart to
+ * InquiryForm. Same submit strategy: POST to /api/application,
+ * fall back to mailto if the API is unavailable.
  */
 export function PractitionerApplicationForm({
   editorialEmail,
 }: {
   editorialEmail: string;
 }) {
-  const [state, setState] = useState<"idle" | "opened">("idle");
+  const [state, setState] = useState<"idle" | "submitting" | "sent" | "opened">(
+    "idle",
+  );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrorMessage(null);
+    setState("submitting");
     const data = new FormData(e.currentTarget);
-    const name = (data.get("name") as string) ?? "";
-    const credential = (data.get("credential") as string) ?? "";
-    const domain = (data.get("domain") as string) ?? "";
-    const years = (data.get("years") as string) ?? "";
-    const verification = (data.get("verification") as string) ?? "";
-    const proposal = (data.get("proposal") as string) ?? "";
-    const links = (data.get("links") as string) ?? "";
+    const name = ((data.get("name") as string) || "").trim();
+    const credential = ((data.get("credential") as string) || "").trim();
+    const domain = ((data.get("domain") as string) || "").trim();
+    const years = ((data.get("years") as string) || "").trim();
+    const verification = ((data.get("verification") as string) || "").trim();
+    const proposal = ((data.get("proposal") as string) || "").trim();
+    const links = ((data.get("links") as string) || "").trim();
 
-    const body = [
-      "Practitioner application",
-      "",
-      `Name: ${name}`,
-      `Credential / title: ${credential}`,
-      `Domain: ${domain}`,
-      `Years in practice: ${years}`,
-      "",
-      "Verification reference:",
-      verification,
-      "",
-      "Proposed skill(s):",
-      proposal,
-      "",
-      "Links / writing / prior work:",
-      links,
-      "",
-      "Sent via launchpad.dev/submit",
-    ].join("\n");
+    const mailtoFallback = () => {
+      const body = [
+        "Practitioner application",
+        "",
+        `Name: ${name}`,
+        `Credential / title: ${credential}`,
+        `Domain: ${domain}`,
+        `Years in practice: ${years}`,
+        "",
+        "Verification reference:",
+        verification,
+        "",
+        "Proposed skill(s):",
+        proposal,
+        "",
+        "Links / writing / prior work:",
+        links,
+        "",
+        "Sent via launchpad.dev/submit (API fallback)",
+      ].join("\n");
+      const href = `mailto:${editorialEmail}?subject=${encodeURIComponent(
+        "[Launchpad] Practitioner application",
+      )}&body=${encodeURIComponent(body)}`;
+      window.location.href = href;
+      setState("opened");
+    };
 
-    const href = `mailto:${editorialEmail}?subject=${encodeURIComponent(
-      "[Launchpad] Practitioner application",
-    )}&body=${encodeURIComponent(body)}`;
-    window.location.href = href;
-    setState("opened");
+    try {
+      const res = await fetch("/api/application", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          applicant_name: name,
+          credential,
+          domain,
+          years_practice: years,
+          verification_ref: verification,
+          proposed_skill: proposal,
+          links,
+        }),
+      });
+      const json = (await res.json()) as { ok?: boolean; error?: string };
+      if (res.ok && json.ok) {
+        setState("sent");
+        return;
+      }
+      if (res.status >= 400 && res.status < 500) {
+        setErrorMessage(json.error || "Couldn't submit. Please review and retry.");
+        setState("idle");
+        return;
+      }
+      mailtoFallback();
+    } catch {
+      mailtoFallback();
+    }
   };
 
   return (
@@ -102,25 +136,43 @@ export function PractitionerApplicationForm({
         placeholder="Prior work, writing, your firm's website, GitHub. Helpful context."
         rows={2}
       />
+      {errorMessage && (
+        <div
+          role="alert"
+          className="text-sm text-[#b04141] border border-[#b04141]/40 bg-[#fdf2f2] px-3 py-2"
+        >
+          {errorMessage}
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-4 pt-1">
         <button
           type="submit"
+          disabled={state === "submitting"}
           className={[
             "inline-flex items-center justify-center",
             "min-h-[48px] px-6 py-3",
             "bg-[color:var(--color-accent)] text-[color:var(--color-accent-fg)]",
             "hover:bg-[color:var(--color-accent-hover)]",
+            "disabled:opacity-60 disabled:cursor-not-allowed",
             "transition-colors font-medium tracking-[0.02em] text-sm md:text-base",
           ].join(" ")}
         >
-          Open in my email client →
+          {state === "submitting" ? "Sending…" : "Send to editorial →"}
         </button>
+        {state === "sent" && (
+          <span
+            role="status"
+            className="text-sm text-[color:var(--color-success)] font-[family-name:var(--font-display)]"
+          >
+            ✓ Received. Editorial replies within one business day.
+          </span>
+        )}
         {state === "opened" && (
           <span
             role="status"
             className="text-sm text-[color:var(--color-success)] font-[family-name:var(--font-display)]"
           >
-            ✓ Draft ready. Send it from your mail client.
+            ✓ Drafted in your mail client. Send it from there.
           </span>
         )}
       </div>

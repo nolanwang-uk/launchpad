@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { CommandPalette, type PaletteEntry } from "@/components/CommandPalette";
 import { loadRegistrySync } from "@/lib/registry";
@@ -85,6 +87,8 @@ export default function RootLayout({
           {children}
           <CommandPalette entries={paletteEntries} />
         </AuthProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

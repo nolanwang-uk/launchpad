@@ -20,3 +20,4 @@ tsconfig.tsbuildinfo
 
 coverage/
 .nyc_output/
+.gstack/
