@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { CommandPalette, type PaletteEntry } from "@/components/CommandPalette";
 import { loadRegistrySync } from "@/lib/registry";
+import { AuthProvider } from "@/lib/auth/context";
 
-const interDisplay = Inter({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--next-inter-display",
+  variable: "--next-fraunces",
   display: "swap",
-  axes: ["opsz"],
+  axes: ["opsz", "SOFT"],
+});
+
+const instrumentSans = Instrument_Sans({
+  subsets: ["latin"],
+  variable: "--next-instrument-sans",
+  display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -29,19 +36,21 @@ const SITE_ORIGIN =
     : "https://launchpad.dev");
 
 export const metadata: Metadata = {
-  title: "Launchpad — one command, any Claude Code skill",
+  title: "Launchpad — a Practitioners' Exchange for Claude Code skills",
   description:
-    "A curated marketplace for Claude Code skills. Discover, install, and run skills with one copy-paste command. Source always visible, SHA-pinned, security-first.",
+    "Domain-expert Claude Code skills, authored by verified practitioners. Securities lawyers, clinical coders, FP&A leads — each skill encodes real professional judgment, SHA-pinned and source-visible.",
   metadataBase: new URL(SITE_ORIGIN),
   openGraph: {
-    title: "Launchpad",
-    description: "One command, any Claude Code skill.",
+    title: "Launchpad — a Practitioners' Exchange",
+    description:
+      "Claude Code skills authored by verified domain practitioners.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Launchpad",
-    description: "One command, any Claude Code skill.",
+    title: "Launchpad — a Practitioners' Exchange",
+    description:
+      "Claude Code skills authored by verified domain practitioners.",
   },
 };
 
@@ -59,7 +68,10 @@ export default function RootLayout({
   }));
 
   return (
-    <html lang="en" className={`${interDisplay.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${instrumentSans.variable} ${jetbrainsMono.variable}`}
+    >
       <body>
         {/* Skip-to-content for keyboard users — visually hidden until
             focused. Target `#main` is set by each page's layout/article. */}
@@ -69,8 +81,10 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        {children}
-        <CommandPalette entries={paletteEntries} />
+        <AuthProvider>
+          {children}
+          <CommandPalette entries={paletteEntries} />
+        </AuthProvider>
       </body>
     </html>
   );

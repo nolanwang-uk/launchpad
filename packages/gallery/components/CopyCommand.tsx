@@ -5,8 +5,8 @@ import { useState } from "react";
 type Size = "hero" | "inline";
 
 const sizes: Record<Size, string> = {
-  hero: "text-lg md:text-xl px-8 py-5 rounded-xl shadow-lg shadow-white/10",
-  inline: "text-sm px-4 py-2.5 rounded-md",
+  hero: "text-base md:text-lg px-6 py-4",
+  inline: "text-sm px-4 py-2.5",
 };
 
 export function CopyCommand({
@@ -37,7 +37,7 @@ export function CopyCommand({
         className={[
           "relative w-full block text-left",
           "bg-[color:var(--color-fg)] text-[color:var(--color-bg)]",
-          "hover:bg-[color:var(--color-accent-muted)]",
+          "hover:bg-[color:var(--color-accent)]",
           "transition-colors duration-150",
           "font-[family-name:var(--font-mono)] tracking-[color:var(--tracking-mono)]",
           "font-medium",

@@ -9,22 +9,22 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       <nav className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
         <Link
           href="/"
-          className="font-semibold text-lg tracking-[color:var(--tracking-display-tight)] py-3 inline-flex items-center min-h-[44px]"
+          className="font-[family-name:var(--font-display)] text-2xl tracking-[color:var(--tracking-display-tight)] py-3 inline-flex items-center min-h-[44px]"
         >
-          launchpad
+          Launchpad
         </Link>
         <div className="flex items-center gap-2 sm:gap-4 text-sm text-[color:var(--color-fg-muted)]">
           <Link
             href="/docs"
             className="hover:text-[color:var(--color-fg)] px-2 py-3 inline-flex items-center min-h-[44px]"
           >
-            docs
+            Docs
           </Link>
           <a
             href="https://github.com/nolanwang-uk/launchpad"
             className="hover:text-[color:var(--color-fg)] px-2 py-3 inline-flex items-center min-h-[44px]"
           >
-            github
+            GitHub
           </a>
         </div>
       </nav>

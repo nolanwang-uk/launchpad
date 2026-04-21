@@ -179,13 +179,13 @@ export function CommandPalette({ entries }: { entries: readonly PaletteEntry[] }
               <span className="font-medium">{h.entry.name}</span>
               <span
                 className={[
-                  "text-[10px] px-1.5 py-0.5 rounded",
+                  "text-[10px] px-1.5 py-0.5 uppercase tracking-[0.12em]",
                   h.entry.tier === "Reviewed"
-                    ? "bg-[color:var(--color-tier-reviewed)] text-[color:var(--color-tier-reviewed-fg)]"
+                    ? "bg-[color:var(--color-tier-verified)] text-[color:var(--color-tier-verified-fg)]"
                     : "border border-[color:var(--color-border-strong)] text-[color:var(--color-fg-muted)]",
                 ].join(" ")}
               >
-                {h.entry.tier}
+                {h.entry.tier === "Reviewed" ? "Verified" : "Community"}
               </span>
               <span className="flex-1 text-sm text-[color:var(--color-fg-muted)] truncate">
                 {h.entry.description}

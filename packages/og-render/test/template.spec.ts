@@ -12,7 +12,9 @@ const ENTRY: RegistryEntry = {
   schema_version: 1,
   name: "hello-world",
   description: "A tiny test skill.",
-  author: "launchpad-seed",
+  author: "Launchpad Editorial",
+  author_credential: "Seed skill maintained by the Launchpad editorial team.",
+  domain: "general",
   license: "MIT",
   repo: "launchpad-skills/hello-world",
   sha: "0123456789abcdef0123456789abcdef01234567",
@@ -64,35 +66,55 @@ describe("renderOgHtml", () => {
     expect(html).toContain("</html>");
   });
 
-  test("includes skill name, description, and install command", () => {
+  test("includes skill name and description", () => {
     const html = renderOgHtml(ENTRY);
     expect(html).toContain("hello-world");
     expect(html).toContain("A tiny test skill.");
-    expect(html).toContain("npx launchpad run hello-world");
   });
 
-  test("encodes the Reviewed tier with the check glyph", () => {
+  test("renders the masthead wordmark + practitioners-exchange tag", () => {
     const html = renderOgHtml(ENTRY);
-    expect(html).toContain("Reviewed");
-    expect(html).toContain('class="tier reviewed"');
-    // Reviewed tier uses the checkmark path
-    expect(html).toContain("M13 4L6 11.5L3 8.5");
+    expect(html).toContain("Launchpad");
+    expect(html).toContain("Practitioners");
   });
 
-  test("switches to Community styling + branch glyph when tier is Community", () => {
+  test("encodes the Reviewed tier as Verified with the seal glyph", () => {
+    const html = renderOgHtml(ENTRY);
+    expect(html).toContain("Verified");
+    expect(html).toContain('class="tier reviewed"');
+    // Seal glyph uses a concentric circle with an inner tick.
+    expect(html).toContain('<circle cx="8" cy="8" r="6"');
+    expect(html).toContain("M5.5 8.25L7.25 10L10.5 6.5");
+  });
+
+  test("switches to Community styling + dot glyph when tier is Community", () => {
     const community: RegistryEntry = { ...ENTRY, tier: "Community" };
     const html = renderOgHtml(community);
     expect(html).toContain('class="tier community"');
     expect(html).toContain("Community");
-    // Branch glyph uses circles, not a checkmark
-    expect(html).not.toContain("M13 4L6 11.5L3 8.5");
+    // Community uses the solid filled dot, not the seal tick.
+    expect(html).toContain('<circle cx="8" cy="8" r="2.5" fill="currentColor"');
+    expect(html).not.toContain("M5.5 8.25L7.25 10L10.5 6.5");
   });
 
-  test("includes the author's name and license + short SHA", () => {
+  test("renders the byline block with initials + author + credential", () => {
     const html = renderOgHtml(ENTRY);
-    expect(html).toContain("by launchpad-seed");
+    expect(html).toContain("Practitioner");
+    expect(html).toContain("Launchpad Editorial");
+    expect(html).toContain("LE"); // initials from "Launchpad Editorial"
+    expect(html).toContain("Seed skill maintained by the Launchpad editorial team.");
+  });
+
+  test("renders the meta row with domain, license, and short SHA", () => {
+    const html = renderOgHtml(ENTRY);
+    expect(html).toContain("general");
     expect(html).toContain("MIT");
     expect(html).toContain("@0123456");
+  });
+
+  test("renders the canonical URL for the entry in the byline footer", () => {
+    const html = renderOgHtml(ENTRY);
+    expect(html).toContain("launchpad.dev/s/hello-world");
   });
 
   test("renders tag line when tags exist", () => {
@@ -107,6 +129,13 @@ describe("renderOgHtml", () => {
     expect(html).not.toContain('class="tags"');
   });
 
+  test("omits credential span when author_credential is absent", () => {
+    const nocred: RegistryEntry = { ...ENTRY, author_credential: undefined };
+    const html = renderOgHtml(nocred);
+    // The CSS rule is always present, but the span rendering should be gone.
+    expect(html).not.toContain('<span class="byline-credential">');
+  });
+
   test("escapes hostile content in description", () => {
     const hostile: RegistryEntry = {
       ...ENTRY,
@@ -117,6 +146,18 @@ describe("renderOgHtml", () => {
     expect(html).toContain("&lt;script&gt;");
   });
 
+  test("escapes hostile content in author name + credential", () => {
+    const hostile: RegistryEntry = {
+      ...ENTRY,
+      author: `<b>pwn</b>`,
+      author_credential: `<img src=x onerror=alert(1)>`,
+    };
+    const html = renderOgHtml(hostile);
+    expect(html).not.toContain("<b>pwn</b>");
+    expect(html).not.toContain("<img src=x");
+    expect(html).toContain("&lt;b&gt;pwn&lt;/b&gt;");
+  });
+
   test("truncates long descriptions to fit the card", () => {
     const long: RegistryEntry = {
       ...ENTRY,
@@ -124,8 +165,17 @@ describe("renderOgHtml", () => {
     };
     const html = renderOgHtml(long);
     expect(html).toContain("…");
-    // The raw 500-a string should not appear verbatim.
     expect(html).not.toContain("a".repeat(200));
+  });
+
+  test("truncates long credentials to fit the byline", () => {
+    const long: RegistryEntry = {
+      ...ENTRY,
+      author_credential: "x".repeat(300),
+    };
+    const html = renderOgHtml(long);
+    expect(html).toContain("…");
+    expect(html).not.toContain("x".repeat(200));
   });
 
   test("exports the 1200x630 OG spec", () => {

@@ -1,9 +1,22 @@
 import type { Tier } from "@launchpad/registry";
 
-const REVIEWED_ARIA =
-  "Reviewed tier: maintainer audited this skill against a published checklist using closed-grammar install commands. Does not guarantee bug-free behavior.";
+/**
+ * Practitioners' Exchange tiering (D-direction):
+ *   Reviewed (schema) → "Verified" in UI. Practitioner credential was
+ *     checked by an editor and the install grammar is closed. Rendered
+ *     as an antique-gold pill with a small seal glyph.
+ *   Community (schema) → "Community". PR-accepted, diff shown at
+ *     install. No editorial review. Rendered as an outlined pill.
+ *
+ * We intentionally don't use the word "Reviewed" in display: on an
+ * exchange, what you're trading on is *who signed the work*, not
+ * whether code was inspected.
+ */
+
+const VERIFIED_ARIA =
+  "Verified practitioner: the author's professional credential was checked by the Launchpad editorial team and the install commands use a closed grammar vetted against common attack patterns.";
 const COMMUNITY_ARIA =
-  "Community tier: PR-accepted by the registry. Diff shown before install. No maintainer audit.";
+  "Community: submitted via public PR, diff shown at install time. No editorial credential check.";
 
 export function TierBadge({
   tier,
@@ -14,22 +27,21 @@ export function TierBadge({
 }) {
   const base =
     size === "md"
-      ? "text-sm px-2.5 py-1 gap-1.5"
-      : "text-xs px-2 py-0.5 gap-1";
+      ? "text-[11px] px-2.5 py-1 gap-1.5 tracking-[0.14em]"
+      : "text-[10px] px-2 py-0.5 gap-1 tracking-[0.12em]";
 
   if (tier === "Reviewed") {
     return (
       <span
-        aria-label={REVIEWED_ARIA}
+        aria-label={VERIFIED_ARIA}
         className={[
-          "inline-flex items-center rounded-full font-medium",
-          "bg-[color:var(--color-tier-reviewed)] text-[color:var(--color-tier-reviewed-fg)]",
-          "border-l-[3px] border-l-white/40",
+          "inline-flex items-center rounded-sm font-medium uppercase",
+          "bg-[color:var(--color-tier-verified)] text-[color:var(--color-tier-verified-fg)]",
           base,
         ].join(" ")}
       >
-        <CheckGlyph />
-        <span>Reviewed</span>
+        <SealGlyph />
+        <span>Verified</span>
       </span>
     );
   }
@@ -38,31 +50,41 @@ export function TierBadge({
     <span
       aria-label={COMMUNITY_ARIA}
       className={[
-        "inline-flex items-center rounded-full font-medium",
+        "inline-flex items-center rounded-sm font-medium uppercase",
         "bg-transparent text-[color:var(--color-fg-muted)]",
         "border border-[color:var(--color-border-strong)]",
         base,
       ].join(" ")}
     >
-      <BranchGlyph />
+      <DotGlyph />
       <span>Community</span>
     </span>
   );
 }
 
-function CheckGlyph() {
+function SealGlyph() {
+  // Minimal editorial seal: concentric circle + inner tick. Hints at a
+  // wax seal/credential stamp without being literal.
   return (
     <svg
       aria-hidden="true"
-      width="12"
-      height="12"
+      width="10"
+      height="10"
       viewBox="0 0 16 16"
       fill="none"
     >
-      <path
-        d="M13 4L6 11.5L3 8.5"
+      <circle
+        cx="8"
+        cy="8"
+        r="6"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.3"
+        fill="none"
+      />
+      <path
+        d="M5.5 8.25L7.25 10L10.5 6.5"
+        stroke="currentColor"
+        strokeWidth="1.3"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -70,24 +92,16 @@ function CheckGlyph() {
   );
 }
 
-function BranchGlyph() {
+function DotGlyph() {
   return (
     <svg
       aria-hidden="true"
-      width="12"
-      height="12"
-      viewBox="0 0 16 16"
-      fill="none"
+      width="6"
+      height="6"
+      viewBox="0 0 8 8"
+      fill="currentColor"
     >
-      <circle cx="5" cy="4" r="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="11" cy="4" r="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="5" cy="12" r="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M5 5.5v5M11 5.5c0 3-3 3.5-6 5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
+      <circle cx="4" cy="4" r="2.5" />
     </svg>
   );
 }
