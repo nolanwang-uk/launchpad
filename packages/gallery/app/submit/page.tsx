@@ -121,9 +121,8 @@ export default function SubmitPage() {
               keep copyright on every skill.
             </p>
             <p className="text-xs text-[color:var(--color-fg-subtle)] leading-relaxed max-w-2xl">
-              v1 runs on invoices and Stripe Connect is not yet wired,
-              so payouts in the first six months are manual and cleared
-              on a 30-day cadence. That will change.
+              Payouts clear on a 30-day cadence today. Faster payouts land when
+              Stripe Connect goes live.
             </p>
           </div>
         </div>

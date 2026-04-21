@@ -96,14 +96,6 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
             </Link>
           </nav>
 
-          <div className="hidden lg:block mt-10 p-4 border border-dashed border-[color:var(--color-border-strong)] text-xs text-[color:var(--color-fg-subtle)] leading-relaxed">
-            Mock backend. Account + ledger data lives in this browser
-            only. Swapping to a real API is a one-file change to
-            <code className="font-[family-name:var(--font-mono)] text-[0.9em] ml-1">
-              lib/auth/storage.ts
-            </code>
-            .
-          </div>
         </aside>
         <section className="min-w-0">{children}</section>
       </div>

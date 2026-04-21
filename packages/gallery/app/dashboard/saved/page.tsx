@@ -78,8 +78,7 @@ export default function SavedPage() {
           Your shortlist.
         </h1>
         <p className="mt-4 text-[color:var(--color-fg-muted)] leading-relaxed max-w-2xl">
-          Skills you&rsquo;ve bookmarked for later. Saves live in this
-          browser only for v1 — they move server-side when accounts do.
+          Skills you&rsquo;ve bookmarked for later.
         </p>
       </header>
 

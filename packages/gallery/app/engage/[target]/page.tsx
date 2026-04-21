@@ -177,15 +177,14 @@ export default async function EngagePage({
             />
 
             <p className="text-xs text-[color:var(--color-fg-subtle)] leading-relaxed mt-6 max-w-xl">
-              Submitting opens your mail client with a pre-filled message to{" "}
+              Your brief routes through editorial at{" "}
               <a
                 href={`mailto:${EDITORIAL_EMAIL}`}
                 className="underline decoration-[color:var(--color-border-strong)] underline-offset-4 hover:text-[color:var(--color-accent)]"
               >
                 {EDITORIAL_EMAIL}
               </a>
-              . v1 ships without a server so your message is never stored
-              on Launchpad infrastructure.
+              . Expect a reply within one business day.
             </p>
           </div>
 

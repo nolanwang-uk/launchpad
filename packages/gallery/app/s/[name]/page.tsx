@@ -276,17 +276,14 @@ export default async function SkillPage({
                 How this skill connects
               </p>
               <p className="text-sm text-[color:var(--color-fg-muted)] leading-relaxed max-w-3xl mb-4">
-                Declared integrations. v1 does not enforce these at
-                runtime &mdash; the diff shown before install is still
-                the authoritative surface. The{" "}
+                What this skill reads from and writes to. The{" "}
                 <Link
                   href="/integrations"
                   className="text-[color:var(--color-accent)] underline decoration-[color:var(--color-border-strong)] underline-offset-4"
                 >
-                  integrations roadmap
+                  integrations page
                 </Link>{" "}
-                explains which of these are live and which are MCP-only
-                today.
+                shows which are live.
               </p>
               <IntegrationList integrations={entry.integrations} />
               <p className="mt-4 text-[11px] uppercase tracking-[0.16em] text-[color:var(--color-fg-subtle)] flex flex-wrap gap-x-3">
@@ -376,11 +373,6 @@ export default async function SkillPage({
                 skillName={entry.name}
                 practitionerName={entry.author}
               />
-              <p className="text-xs text-[color:var(--color-fg-subtle)] leading-relaxed max-w-md">
-                Reader notes are editorial, not user-generated. v2 opens
-                verified-buyer reviews once engagements settle through
-                the editorial desk.
-              </p>
             </div>
           </section>
 
@@ -517,11 +509,6 @@ export default async function SkillPage({
             <Stat label="License">{entry.license}</Stat>
           </div>
 
-          <p className="text-xs text-[color:var(--color-fg-subtle)] leading-relaxed">
-            Capabilities (network / filesystem / shell) are declared in
-            <Mono> skill.yml</Mono> but not enforced at runtime in v1. A
-            badge we can&rsquo;t verify is worse than no badge.
-          </p>
         </aside>
       </div>
     </main>

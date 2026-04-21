@@ -181,8 +181,8 @@ export default function CreditsPage() {
               Top up credits
             </p>
             <p className="text-sm text-[color:var(--color-fg-muted)] leading-relaxed mb-4">
-              v1 bills by invoice. Pick a pack; editorial sends you a
-              Stripe link within one business day.
+              Pick a pack. Editorial sends a Stripe invoice within one
+              business day.
             </p>
             <ul className="space-y-2">
               {CREDIT_PACKS.map((p) => (

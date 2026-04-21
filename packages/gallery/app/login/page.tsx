@@ -171,11 +171,6 @@ function LoginForm() {
               )}
             </ul>
           </div>
-          <p className="text-xs text-[color:var(--color-fg-subtle)] leading-relaxed">
-            v1 auth runs entirely in your browser via localStorage and
-            SHA-256-hashed passwords. The API layer moves server-side
-            in v2 without UI changes.
-          </p>
         </aside>
       </section>
     </main>

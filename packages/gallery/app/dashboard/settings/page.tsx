@@ -144,7 +144,7 @@ export default function SettingsPage() {
     return (
       <SectionBlock
         title="Password"
-        description="Client-side SHA-256 hashed. When the server lands this request moves server-side and argon2 replaces SHA-256."
+        description="Choose a password only you know. Minimum eight characters."
       >
         <form onSubmit={onSubmit} className="space-y-4 max-w-md">
           <TextField
@@ -244,7 +244,7 @@ export default function SettingsPage() {
     return (
       <SectionBlock
         title="Reset local state"
-        description="Wipes every Launchpad account and dashboard record stored in this browser. Useful for demo resets. v2 replaces this with a per-account delete."
+        description="Wipes every Launchpad account and dashboard record stored in this browser. Useful for demo resets."
       >
         {!confirming ? (
           <button
