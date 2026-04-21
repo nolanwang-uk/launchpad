@@ -87,6 +87,9 @@ export default async function SkillPage({
   const authorSlug = entry.author_slug ?? deriveAuthorSlug(entry.author);
   const hasReviews =
     typeof entry.rating === "number" && (entry.reviews_count ?? 0) > 0;
+  // MVP prototype entries carry an all-zeros SHA. Tag them as placeholder
+  // so the commit pill isn't misread as an authentic provenance chain.
+  const isPlaceholderSha = /^0+$/.test(entry.sha);
 
   // Related entries: other skills by the same practitioner, plus
   // other skills in the same desk. Dedupe against the current entry
@@ -497,7 +500,16 @@ export default async function SkillPage({
               </a>
             </Stat>
             <Stat label="Commit">
-              <Mono>{entry.sha.slice(0, 7)}</Mono>
+              {isPlaceholderSha ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Mono>{entry.sha.slice(0, 7)}</Mono>
+                  <span className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-fg-subtle)]">
+                    Placeholder
+                  </span>
+                </span>
+              ) : (
+                <Mono>{entry.sha.slice(0, 7)}</Mono>
+              )}
             </Stat>
             <Stat label="Tier">
               <TierBadge tier={entry.tier} size="sm" />
