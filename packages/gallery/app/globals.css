@@ -27,17 +27,18 @@
   --color-tier-verified: #8a6a2e;
   --color-tier-verified-fg: #ffffff;
 
-  /* Typography — editorial. Fraunces for display (the unabashedly
-     serif, optical-size-aware face that signals "publication, not
-     product"); Instrument Sans for body/UI; JetBrains Mono retained
-     for code blocks so CLI samples still read as code. */
-  --font-display: var(--next-fraunces), "Times New Roman", Georgia, serif;
-  --font-body: var(--next-instrument-sans), system-ui, -apple-system, sans-serif;
-  --font-mono: var(--next-jetbrains-mono), ui-monospace, monospace;
+  /* Typography — editorial. Instrument Serif for display (high-contrast
+     didone, unabashedly a serif, signals "publication, not product");
+     IBM Plex Sans for body/UI; IBM Plex Mono for CLI + inline code. */
+  --font-display: var(--next-instrument-serif), "Times New Roman", Georgia, serif;
+  --font-body: var(--next-plex-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--next-plex-mono), ui-monospace, monospace;
 
   --tracking-display-tight: -0.02em;
   --tracking-display: -0.01em;
   --tracking-mono: -0.01em;
+  --tracking-eyebrow: 0.18em;
+  --tracking-small-caps: 0.14em;
 }
 
 @layer base {

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { Instrument_Serif, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -7,22 +7,25 @@ import { CommandPalette, type PaletteEntry } from "@/components/CommandPalette";
 import { loadRegistrySync } from "@/lib/registry";
 import { AuthProvider } from "@/lib/auth/context";
 
-const fraunces = Fraunces({
+const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
-  variable: "--next-fraunces",
-  display: "swap",
-  axes: ["opsz", "SOFT"],
-});
-
-const instrumentSans = Instrument_Sans({
-  subsets: ["latin"],
-  variable: "--next-instrument-sans",
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--next-instrument-serif",
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const plexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  variable: "--next-jetbrains-mono",
+  weight: ["400", "500", "600"],
+  variable: "--next-plex-sans",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--next-plex-mono",
   display: "swap",
 });
 
@@ -72,7 +75,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${instrumentSans.variable} ${jetbrainsMono.variable}`}
+      className={`${instrumentSerif.variable} ${plexSans.variable} ${plexMono.variable}`}
     >
       <body>
         {/* Skip-to-content for keyboard users — visually hidden until
